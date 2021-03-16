@@ -1,0 +1,12 @@
+.top-bar {
+  height: 50px;
+  background-color: lightgrey;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 8px;
+
+  .top-bar-login {
+    margin-right: 8px;
+  }
+}
