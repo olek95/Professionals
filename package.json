@@ -29,8 +29,8 @@
     "build": "npm run lint && npm run check && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "prettier --write src/**/*.{ts{,x},scss,json,js}",
-    "check": "prettier --check src/**/*.{ts{,x},scss,json,js}",
+    "format": "prettier --write {src,public}/**/*.{ts{,x},scss,json,js,html}",
+    "check": "prettier --check {src,public}/**/*.{ts{,x},scss,json,js,html}",
     "lint": "eslint **/*.{js,ts{,x}} --max-warnings=0"
   },
   "eslintConfig": {
