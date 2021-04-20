@@ -1,6 +1,10 @@
 {
+  "COMMON": {
+    "CANCEL_BUTTON": "Cancel"
+  },
   "TOP_BAR": {
     "LOGIN_BUTTON": "Sign in",
+    "LOGIN_TITLE": "Login",
     "SIGN_UP_BUTTON": "Sign up"
   }
 }
