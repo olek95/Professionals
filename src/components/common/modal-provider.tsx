@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useState } from 'react';
 import { ModalConfiguration } from './modal-configuration';
 import { ModalContext } from './modal-context';
 import Modal from './modal';
@@ -18,18 +18,27 @@ export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
         },
       } as ModalConfiguration<T>)
     : undefined;
-  const BodyComponent = finalConfiguration?.body as React.ComponentType<T>;
+  const Body = finalConfiguration?.body as React.ComponentType<T>;
+  const close = useCallback(() => {
+    setConfiguration(undefined);
+    setUpdatedConfiguration(undefined);
+  }, []);
   return (
     <ModalContext.Provider
-      value={{ configure: setConfiguration, update: setUpdatedConfiguration }}
+      value={{
+        configure: setConfiguration,
+        update: setUpdatedConfiguration,
+        close: close,
+      }}
     >
       {finalConfiguration && (
         <Modal
+          close={close}
           title={finalConfiguration.title}
           leftButtons={finalConfiguration.leftButtons}
           rightButtons={finalConfiguration.rightButtons}
         >
-          <BodyComponent {...finalConfiguration.bodyParams}></BodyComponent>
+          <Body {...finalConfiguration.bodyParams}></Body>
         </Modal>
       )}
       {props.children}

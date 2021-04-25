@@ -8,6 +8,12 @@ import { LoginProps } from '../login/login-props';
 import { ModalContextProps } from '../common/modal-context-props';
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
+  private static readonly DEFAULT_LOGIN_CONF: Readonly<TopBarState> = {
+    enabledLogin: false,
+    login: '',
+    password: '',
+  };
+
   static contextType = ModalContext;
 
   context:
@@ -16,55 +22,8 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
 
   constructor(props: WithTranslation) {
     super(props);
-    this.state = {
-      enabledLogin: false,
-      login: '',
-      password: '',
-    };
+    this.state = TopBar.DEFAULT_LOGIN_CONF;
   }
-
-  onLoginChanged = (login: string) => {
-    this.setState(
-      {
-        login,
-      },
-      this.updateLoginEnableState
-    );
-  };
-
-  onPasswordChanged = (password: string) => {
-    this.setState(
-      {
-        password,
-      },
-      this.updateLoginEnableState
-    );
-  };
-
-  openModal = () =>
-    this.context?.configure({
-      body: Login,
-      bodyParams: {
-        loginChange: this.onLoginChanged,
-        passwordChange: this.onPasswordChanged,
-        login: this.state.login,
-        password: this.state.password,
-      },
-      title: 'TOP_BAR.LOGIN_TITLE',
-      leftButtons: [
-        {
-          label: 'COMMON.CANCEL_BUTTON',
-          onClick: () => {},
-        },
-      ],
-      rightButtons: [
-        {
-          disabled: !this.state.enabledLogin,
-          label: 'TOP_BAR.LOGIN_BUTTON',
-          onClick: () => {},
-        },
-      ],
-    });
 
   render() {
     return (
@@ -78,6 +37,52 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
       </div>
     );
   }
+
+  openModal = () => {
+    this.setState(TopBar.DEFAULT_LOGIN_CONF, () =>
+      this.context?.configure({
+        body: Login,
+        bodyParams: {
+          loginChange: this.onLoginChanged,
+          passwordChange: this.onPasswordChanged,
+          login: this.state.login,
+          password: this.state.password,
+        },
+        title: 'TOP_BAR.LOGIN_TITLE',
+        leftButtons: [
+          {
+            label: 'COMMON.CANCEL_BUTTON',
+            onClick: () => this.context?.close(),
+          },
+        ],
+        rightButtons: [
+          {
+            disabled: !this.state.enabledLogin,
+            label: 'TOP_BAR.LOGIN_BUTTON',
+            onClick: () => {},
+          },
+        ],
+      })
+    );
+  };
+
+  private onLoginChanged = (login: string) => {
+    this.setState(
+      {
+        login,
+      },
+      this.updateLoginEnableState
+    );
+  };
+
+  private onPasswordChanged = (password: string) => {
+    this.setState(
+      {
+        password,
+      },
+      this.updateLoginEnableState
+    );
+  };
 
   private updateLoginEnableState() {
     this.setState(

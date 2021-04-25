@@ -1,7 +1,8 @@
 import { Button } from '../../models/button/button';
 
 export interface ModalProps {
-  title: string;
+  close: () => void;
   leftButtons: Button[];
   rightButtons: Button[];
+  title: string;
 }
