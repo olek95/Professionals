@@ -3,13 +3,15 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import React, { Context } from 'react';
 import { Login } from '../login/login';
 import { TopBarState } from './top-bar-state';
-import { ModalContext } from '../common/modal-context';
+import { ModalContext } from '../common/modal/modal-context';
 import { LoginProps } from '../login/login-props';
-import { ModalContextProps } from '../common/modal-context-props';
+import { ModalContextProps } from '../common/modal/modal-context-props';
+import { UserService } from '../../services/user/user.service';
+import { Button } from '../../models/button/button';
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
   private static readonly DEFAULT_LOGIN_CONF: Readonly<TopBarState> = {
-    enabledLogin: false,
+    disabledLogin: true,
     login: '',
     password: '',
   };
@@ -20,9 +22,19 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     | React.ContextType<Context<ModalContextProps<LoginProps>>>
     | undefined;
 
+  private readonly loginButton: Button;
+
   constructor(props: WithTranslation) {
     super(props);
     this.state = TopBar.DEFAULT_LOGIN_CONF;
+    this.loginButton = {
+      disabled: this.state.disabledLogin,
+      label: 'TOP_BAR.LOGIN_BUTTON',
+      onClick: () =>
+        UserService.login(this.state.login, this.state.password)
+          .then(this.context?.close)
+          .catch(console.error),
+    };
   }
 
   render() {
@@ -52,16 +64,11 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
         leftButtons: [
           {
             label: 'COMMON.CANCEL_BUTTON',
-            onClick: () => this.context?.close(),
+            onClick: this.context?.close,
           },
         ],
-        rightButtons: [
-          {
-            disabled: !this.state.enabledLogin,
-            label: 'TOP_BAR.LOGIN_BUTTON',
-            onClick: () => {},
-          },
-        ],
+        rightButtons: [this.loginButton],
+        onEnterPressed: this.loginButton.onClick,
       })
     );
   };
@@ -87,25 +94,20 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   private updateLoginEnableState() {
     this.setState(
       (state) => ({
-        enabledLogin: !!state.password && !!state.login,
+        disabledLogin: !state.password || !state.login,
       }),
       this.updateLoginModal
     );
   }
 
   private updateLoginModal() {
+    this.loginButton.disabled = this.state.disabledLogin;
     this.context?.update({
       bodyParams: {
         login: this.state.login,
         password: this.state.password,
       },
-      rightButtons: [
-        {
-          disabled: !this.state.enabledLogin,
-          label: 'TOP_BAR.LOGIN_BUTTON',
-          onClick: () => {},
-        },
-      ],
+      rightButtons: [this.loginButton],
     });
   }
 }

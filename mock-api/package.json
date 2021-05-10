@@ -1,0 +1,13 @@
+{
+  "name": "mock-api",
+  "version": "1.0.0",
+  "description": "A simple JSON mock API",
+  "scripts": {
+    "start": "npx json-server --watch src/db.json --port 3001 -m ./node_modules/json-server-auth",
+    "start-auth": "node index.js"
+  },
+  "dependencies": {
+    "json-server": "^0.16.3",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

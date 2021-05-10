@@ -1,7 +1,13 @@
-import React, { PropsWithChildren, useCallback, useState } from 'react';
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { ModalConfiguration } from './modal-configuration';
 import { ModalContext } from './modal-context';
 import Modal from './modal';
+import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key.enum';
 
 export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
   const [configuration, setConfiguration] = useState<ModalConfiguration<T>>();
@@ -23,6 +29,28 @@ export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
     setConfiguration(undefined);
     setUpdatedConfiguration(undefined);
   }, []);
+  const { onEscPressed, onEnterPressed } = { ...finalConfiguration };
+  const onEscPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === KeyboardKey.ESCAPE) {
+        close();
+        if (onEscPressed) {
+          onEscPressed();
+        }
+      }
+    },
+    [close, onEscPressed]
+  );
+  const onEnterPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === KeyboardKey.ENTER && onEnterPressed) {
+        onEnterPressed();
+      }
+    },
+    [onEnterPressed]
+  );
+  useEffect(() => updateKeyDownEventListener(onEscPress), [onEscPress]);
+  useEffect(() => updateKeyDownEventListener(onEnterPress), [onEnterPress]);
   return (
     <ModalContext.Provider
       value={{
@@ -44,4 +72,11 @@ export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
       {props.children}
     </ModalContext.Provider>
   );
+};
+
+const updateKeyDownEventListener = (
+  eventHandler: (event: KeyboardEvent) => void
+) => {
+  document.addEventListener('keydown', eventHandler);
+  return () => document.removeEventListener('keydown', eventHandler);
 };

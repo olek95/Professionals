@@ -1,4 +1,4 @@
-import { Button } from '../../models/button/button';
+import { Button } from '../../../models/button/button';
 
 export interface ModalProps {
   close: () => void;

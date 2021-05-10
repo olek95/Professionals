@@ -1,5 +1,5 @@
 import React, { MouseEvent, RefObject } from 'react';
-import { Button } from '../../models/button/button';
+import { Button } from '../../../models/button/button';
 import './modal.scss';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { ModalProps } from './modal-props';

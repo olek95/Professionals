@@ -1,5 +1,5 @@
 export interface TopBarState {
-  enabledLogin: boolean;
+  disabledLogin: boolean;
   login: string;
   password: string;
 }
