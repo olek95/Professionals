@@ -12,7 +12,7 @@ class Modal extends React.Component<ModalProps & WithTranslation> {
     this.modalRef = React.createRef();
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <div className='modal' onClick={this.close}>
         <div className='modal-content' ref={this.modalRef}>
@@ -29,13 +29,13 @@ class Modal extends React.Component<ModalProps & WithTranslation> {
     );
   }
 
-  close = (event: MouseEvent) => {
+  close = (event: MouseEvent): void => {
     if (!this.modalRef.current?.contains(event.target as Node)) {
       this.props.close();
     }
   };
 
-  mapButtons(buttons: Button[]) {
+  mapButtons(buttons: Button[]): JSX.Element[] {
     return buttons.map((button) => (
       <button
         onClick={button.onClick}

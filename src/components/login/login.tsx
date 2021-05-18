@@ -3,7 +3,7 @@ import React, { ChangeEvent } from 'react';
 import { LoginProps } from './login-props';
 
 export class Login extends React.Component<LoginProps> {
-  render() {
+  render(): JSX.Element {
     return (
       <div className='login'>
         <label>
@@ -27,9 +27,9 @@ export class Login extends React.Component<LoginProps> {
     );
   }
 
-  onLoginChanged = (event: ChangeEvent<HTMLInputElement>) =>
+  onLoginChanged = (event: ChangeEvent<HTMLInputElement>): void =>
     this.props.loginChange(event.target.value);
 
-  onPasswordChanged = (event: ChangeEvent<HTMLInputElement>) =>
+  onPasswordChanged = (event: ChangeEvent<HTMLInputElement>): void =>
     this.props.passwordChange(event.target.value);
 }

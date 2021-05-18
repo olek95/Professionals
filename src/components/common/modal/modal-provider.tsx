@@ -9,7 +9,9 @@ import { ModalContext } from './modal-context';
 import Modal from './modal';
 import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key.enum';
 
-export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
+export const ModalProvider = <T extends {}>(
+  props: PropsWithChildren<{}>
+): JSX.Element => {
   const [configuration, setConfiguration] = useState<ModalConfiguration<T>>();
   const [updatedConfiguration, setUpdatedConfiguration] = useState<
     Partial<ModalConfiguration<Partial<T>>>
@@ -76,7 +78,7 @@ export const ModalProvider = <T extends {}>(props: PropsWithChildren<{}>) => {
 
 const updateKeyDownEventListener = (
   eventHandler: (event: KeyboardEvent) => void
-) => {
+): (() => void) => {
   document.addEventListener('keydown', eventHandler);
   return () => document.removeEventListener('keydown', eventHandler);
 };

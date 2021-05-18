@@ -37,7 +37,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     };
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <div className='top-bar'>
         <div>
@@ -50,7 +50,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   }
 
-  openModal = () => {
+  openModal = (): void => {
     this.setState(TopBar.DEFAULT_LOGIN_CONF, () =>
       this.context?.configure({
         body: Login,
@@ -73,7 +73,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   };
 
-  private onLoginChanged = (login: string) => {
+  private onLoginChanged = (login: string): void => {
     this.setState(
       {
         login,
@@ -82,7 +82,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   };
 
-  private onPasswordChanged = (password: string) => {
+  private onPasswordChanged = (password: string): void => {
     this.setState(
       {
         password,
@@ -91,7 +91,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   };
 
-  private updateLoginEnableState() {
+  private updateLoginEnableState(): void {
     this.setState(
       (state) => ({
         disabledLogin: !state.password || !state.login,
@@ -100,7 +100,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   }
 
-  private updateLoginModal() {
+  private updateLoginModal(): void {
     this.loginButton.disabled = this.state.disabledLogin;
     this.context?.update({
       bodyParams: {

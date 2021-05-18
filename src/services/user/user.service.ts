@@ -1,6 +1,6 @@
 export class UserService {
-  static login(login: string, password: string) {
-    return fetch('http://localhost:3001/auth/login', {
+  static login(login: string, password: string): Promise<string> {
+    return fetch('http://localhost:3001/user/login', {
       body: JSON.stringify({
         login: login,
         password: password,
@@ -11,10 +11,9 @@ export class UserService {
       },
     }).then((response) => {
       if (response.ok) {
-        return response.json();
-      } else {
-        throw response;
+        return response.text();
       }
+      throw response;
     });
   }
 }
