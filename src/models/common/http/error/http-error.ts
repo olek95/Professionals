@@ -1,4 +1,4 @@
-import { HttpStatus } from '../http-status/http-status.enum';
+import { HttpStatus } from '../status/http-status.enum';
 
 export interface HttpError {
   message: string;

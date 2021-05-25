@@ -1,10 +1,10 @@
 import * as fs from 'fs';
-import { sign, verify } from 'jsonwebtoken';
-import { Router } from 'express';
-import { User } from '../../model/user/user';
-import { HttpError } from '../../model/common/http-error/http-error';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { HttpStatus } from '../../model/common/http-status/http-status.enum';
+import {sign, verify} from 'jsonwebtoken';
+import {Router} from 'express';
+import {User} from '../../model/user/user';
+import {HttpError} from '../../../../src/models/common/http/error/http-error';
+import {ParamsDictionary} from 'express-serve-static-core';
+import {HttpStatus} from '../../../../src/models/common/http/status/http-status.enum';
 
 export default class UserController {
   private static readonly SECRET_KEY = '123456789';

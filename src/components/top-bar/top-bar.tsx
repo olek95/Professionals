@@ -1,13 +1,16 @@
 import './top-bar.scss';
-import { WithTranslation, withTranslation } from 'react-i18next';
-import React, { Context } from 'react';
-import { Login } from '../login/login';
-import { TopBarState } from './top-bar-state';
-import { ModalContext } from '../common/modal/modal-context';
-import { LoginProps } from '../login/login-props';
-import { ModalContextProps } from '../common/modal/modal-context-props';
-import { UserService } from '../../services/user/user.service';
-import { Button } from '../../models/button/button';
+import {WithTranslation, withTranslation} from 'react-i18next';
+import React, {Context, ReactNode} from 'react';
+import {Login} from '../login/login';
+import {TopBarState} from './top-bar-state';
+import {ModalContext} from '../common/modal/modal-context';
+import {LoginProps} from '../login/login-props';
+import {ModalContextProps} from '../common/modal/modal-context-props';
+import {UserService} from '../../services/user/user.service';
+import {Button} from '../../models/button/button';
+import {ToastContext} from '../common/toast/toast-context';
+import {ToastContainer} from "react-toastr";
+import {HttpErrorResponse} from "../../models/common/http/error/http-error-response";
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
   private static readonly DEFAULT_LOGIN_CONF: Readonly<TopBarState> = {
@@ -24,6 +27,8 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
 
   private readonly loginButton: Button;
 
+  private toast: ToastContainer | undefined;
+
   constructor(props: WithTranslation) {
     super(props);
     this.state = TopBar.DEFAULT_LOGIN_CONF;
@@ -33,7 +38,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
       onClick: () =>
         UserService.login(this.state.login, this.state.password)
           .then(this.context?.close)
-          .catch(console.error),
+          .catch(this.onLoginError),
     };
   }
 
@@ -41,6 +46,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     return (
       <div className='top-bar'>
         <div>
+          <ToastContext.Consumer>{this.setToast}</ToastContext.Consumer>
           <button className='top-bar-login' onClick={this.openModal}>
             {this.props.t('TOP_BAR.LOGIN_BUTTON')}
           </button>
@@ -71,6 +77,15 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
         onEnterPressed: this.loginButton.onClick,
       })
     );
+  };
+
+  setToast = (toast: ToastContainer | undefined): ReactNode => {
+    this.toast = toast;
+    return;
+  };
+
+  private onLoginError = (error: HttpErrorResponse): void => {
+    this.toast?.error(error.message, error.statusText);
   };
 
   private onLoginChanged = (login: string): void => {
