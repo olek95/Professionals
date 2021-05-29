@@ -21,4 +21,24 @@ export class UserService {
       });
     });
   }
+
+  static signUp(login: string, password: string): Promise<string> {
+    return fetch('http://localhost:3001/user/register', {
+      body: JSON.stringify({
+        login: login,
+        password: password,
+      }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      return response.json().then((error: HttpError) => {
+        throw new HttpErrorResponse(error.message, error.status, response.statusText);
+      });
+    });
+  }
 }

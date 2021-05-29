@@ -11,15 +11,30 @@ export default class UserController {
   private static URL = '/user';
   private static readonly LOGIN_URL = `${UserController.URL}/login`;
   private static readonly USER_DB: User[] = JSON.parse(
-    fs.readFileSync('./src/db/users.json', {
-      encoding: 'utf-8',
-    })
+      UserController.readFileOrCreateIfNotExist()
   );
 
   static readonly ROUTES = [
     UserController.onLogin(),
     UserController.onIsLogin(),
+    UserController.onSignUp()
   ];
+
+  private static readFileOrCreateIfNotExist(): string {
+    try {
+      return fs.readFileSync('./src/db/users.json', {
+        encoding: 'utf-8',
+      })
+    } catch(error) {
+      if (error.code === 'ENOENT') {
+        const defaultUsers = JSON.stringify([]);
+        fs.writeFileSync('./src/db/users.json', defaultUsers);
+        return defaultUsers;
+      } else {
+        throw error;
+      }
+    }
+  }
 
   private static onLogin(): Router {
     return Router().post<ParamsDictionary, string | HttpError, User>(
@@ -39,7 +54,7 @@ export default class UserController {
 
   private static onIsLogin(): Router {
     return Router().use<ParamsDictionary, HttpError>(
-      new RegExp(`^(?!${UserController.LOGIN_URL}$)`),
+      new RegExp(`^(?!${UserController.LOGIN_URL}|/user/register$)`),
       (request, response, next) => {
         const authorization = request.headers.authorization?.split(' ');
         if (authorization && authorization[0] === 'Bearer') {
@@ -79,5 +94,17 @@ export default class UserController {
       UserController.SECRET_KEY,
       (errors, decodedObject) => decodedObject || errors
     );
+  }
+
+  private static onSignUp(): Router {
+    return Router().post(`${UserController.URL}/register`, (request, response) => {
+      UserController.USER_DB.push(request.body);
+      fs.writeFile('./src/db/users.json', JSON.stringify(UserController.USER_DB, null, 2), (err) => {
+        if (err) {
+         return;
+        }
+        response.status(HttpStatus.OK);
+      });
+    });
   }
 }

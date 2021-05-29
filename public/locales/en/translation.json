@@ -5,6 +5,7 @@
   "TOP_BAR": {
     "LOGIN_BUTTON": "Sign in",
     "LOGIN_TITLE": "Login",
+    "REGISTRATION_TITLE": "Registration",
     "SIGN_UP_BUTTON": "Sign up"
   }
 }

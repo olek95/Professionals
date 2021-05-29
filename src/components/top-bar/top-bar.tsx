@@ -11,6 +11,7 @@ import {Button} from '../../models/button/button';
 import {ToastContext} from '../common/toast/toast-context';
 import {ToastContainer} from "react-toastr";
 import {HttpErrorResponse} from "../../models/common/http/error/http-error-response";
+import {Registration} from "../registration/registration";
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
   private static readonly DEFAULT_LOGIN_CONF: Readonly<TopBarState> = {
@@ -26,6 +27,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     | undefined;
 
   private readonly loginButton: Button;
+  private readonly registerButton: Button;
 
   private toast: ToastContainer | undefined;
 
@@ -40,6 +42,14 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
           .then(this.context?.close)
           .catch(this.onLoginError),
     };
+    this.registerButton  = {
+        disabled: false,
+        label: 'TOP_BAR.REGISTER_BUTTON',
+        onClick: () =>
+            UserService.signUp('test1', 'test2')
+                .then(this.context?.close)
+                .catch(this.onLoginError),
+    };
   }
 
   render(): JSX.Element {
@@ -47,16 +57,16 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
       <div className='top-bar'>
         <div>
           <ToastContext.Consumer>{this.setToast}</ToastContext.Consumer>
-          <button className='top-bar-login' onClick={this.openModal}>
+          <button className='top-bar-login' onClick={this.openLoginModal}>
             {this.props.t('TOP_BAR.LOGIN_BUTTON')}
           </button>
-          <button>{this.props.t('TOP_BAR.SIGN_UP_BUTTON')}</button>
+          <button onClick={this.openRegistrationModal}>{this.props.t('TOP_BAR.SIGN_UP_BUTTON')}</button>
         </div>
       </div>
     );
   }
 
-  openModal = (): void => {
+  openLoginModal = (): void => {
     this.setState(TopBar.DEFAULT_LOGIN_CONF, () =>
       this.context?.configure({
         body: Login,
@@ -82,6 +92,29 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   setToast = (toast: ToastContainer | undefined): ReactNode => {
     this.toast = toast;
     return;
+  };
+
+  openRegistrationModal = (): void => {
+    this.setState(TopBar.DEFAULT_LOGIN_CONF, () =>
+        this.context?.configure({
+          body: Registration,
+          bodyParams: {
+            loginChange: this.onLoginChanged,
+            passwordChange: this.onPasswordChanged,
+            login: this.state.login,
+            password: this.state.password,
+          },
+          title: 'TOP_BAR.REGISTRATION_TITLE',
+          leftButtons: [
+            {
+              label: 'COMMON.CANCEL_BUTTON',
+              onClick: this.context?.close,
+            },
+          ],
+          rightButtons: [this.registerButton],
+          onEnterPressed: this.registerButton.onClick,
+        })
+    );
   };
 
   private onLoginError = (error: HttpErrorResponse): void => {
