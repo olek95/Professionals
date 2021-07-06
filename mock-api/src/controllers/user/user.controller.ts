@@ -1,34 +1,35 @@
 import * as fs from 'fs';
-import {sign, verify} from 'jsonwebtoken';
-import {Router} from 'express';
-import {User} from '../../model/user/user';
-import {HttpError} from '../../../../src/models/common/http/error/http-error';
-import {ParamsDictionary} from 'express-serve-static-core';
-import {HttpStatus} from '../../../../src/models/common/http/status/http-status.enum';
+import { sign, verify } from 'jsonwebtoken';
+import { Router } from 'express';
+import { User } from '../../model/user/user';
+import { HttpError } from '../../../../src/models/common/http/error/http-error';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { HttpStatus } from '../../../../src/models/common/http/status/http-status.enum';
 
 export default class UserController {
   private static readonly SECRET_KEY = '123456789';
   private static URL = '/user';
   private static readonly LOGIN_URL = `${UserController.URL}/login`;
   private static readonly USER_DB: User[] = JSON.parse(
-      UserController.readFileOrCreateIfNotExist()
+    UserController.readFileOrCreateIfNotExist()
   );
+  private static readonly USER_FILE_PATH = './src/db/users.json';
 
   static readonly ROUTES = [
     UserController.onLogin(),
     UserController.onIsLogin(),
-    UserController.onSignUp()
+    UserController.onSignUp(),
   ];
 
   private static readFileOrCreateIfNotExist(): string {
     try {
-      return fs.readFileSync('./src/db/users.json', {
+      return fs.readFileSync(UserController.USER_FILE_PATH, {
         encoding: 'utf-8',
-      })
-    } catch(error) {
+      });
+    } catch (error) {
       if (error.code === 'ENOENT') {
         const defaultUsers = JSON.stringify([]);
-        fs.writeFileSync('./src/db/users.json', defaultUsers);
+        fs.writeFileSync(UserController.USER_FILE_PATH, defaultUsers);
         return defaultUsers;
       } else {
         throw error;
@@ -97,14 +98,21 @@ export default class UserController {
   }
 
   private static onSignUp(): Router {
-    return Router().post(`${UserController.URL}/register`, (request, response) => {
-      UserController.USER_DB.push(request.body);
-      fs.writeFile('./src/db/users.json', JSON.stringify(UserController.USER_DB, null, 2), (err) => {
-        if (err) {
-         return;
-        }
-        response.status(HttpStatus.OK);
-      });
-    });
+    return Router().post(
+      `${UserController.URL}/register`,
+      (request, response) => {
+        UserController.USER_DB.push(request.body);
+        fs.writeFile(
+          UserController.USER_FILE_PATH,
+          JSON.stringify(UserController.USER_DB, null, 2),
+          (err) => {
+            if (err) {
+              return;
+            }
+            response.status(HttpStatus.OK);
+          }
+        );
+      }
+    );
   }
 }

@@ -23,6 +23,15 @@ export class Registration extends React.Component<RegistrationProps> {
             onChange={this.onPasswordChanged}
           />
         </label>
+        <label className='registration-email'>
+          Email:
+          <input
+            type='email'
+            className='registration-email-input'
+            value={this.props.email}
+            onChange={this.onEmailChanged}
+          />
+        </label>
       </div>
     );
   }
@@ -32,4 +41,7 @@ export class Registration extends React.Component<RegistrationProps> {
 
   onPasswordChanged = (event: ChangeEvent<HTMLInputElement>): void =>
     this.props.passwordChange(event.target.value);
+
+  onEmailChanged = (event: ChangeEvent<HTMLInputElement>): void =>
+    this.props.emailChange(event.target.value);
 }

@@ -1,5 +1,5 @@
-import {HttpErrorResponse} from "../../models/common/http/error/http-error-response";
-import {HttpError} from "../../models/common/http/error/http-error";
+import { HttpErrorResponse } from '../../models/common/http/error/http-error-response';
+import { HttpError } from '../../models/common/http/error/http-error';
 
 export class UserService {
   static login(login: string, password: string): Promise<string> {
@@ -17,7 +17,11 @@ export class UserService {
         return response.text();
       }
       return response.json().then((error: HttpError) => {
-        throw new HttpErrorResponse(error.message, error.status, response.statusText);
+        throw new HttpErrorResponse(
+          error.message,
+          error.status,
+          response.statusText
+        );
       });
     });
   }
@@ -37,7 +41,11 @@ export class UserService {
         return response.text();
       }
       return response.json().then((error: HttpError) => {
-        throw new HttpErrorResponse(error.message, error.status, response.statusText);
+        throw new HttpErrorResponse(
+          error.message,
+          error.status,
+          response.statusText
+        );
       });
     });
   }
