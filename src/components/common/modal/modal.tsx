@@ -1,8 +1,8 @@
 import React, { MouseEvent, RefObject } from 'react';
-import { Button } from '../../../models/button/button';
-import './modal.scss';
 import { WithTranslation, withTranslation } from 'react-i18next';
+import { Button } from '../../../models/button/button';
 import { ModalProps } from './modal-props';
+import './modal.scss';
 
 class Modal extends React.Component<ModalProps & WithTranslation> {
   private readonly modalRef: RefObject<HTMLDivElement>;

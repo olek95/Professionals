@@ -1,18 +1,18 @@
-import './top-bar.scss';
-import { WithTranslation, withTranslation } from 'react-i18next';
 import React, { Context, ReactNode } from 'react';
-import Login from '../login/login';
-import { TopBarState } from './top-bar-state';
-import { ModalContext } from '../common/modal/modal-context';
-import { LoginProps } from '../login/login-props';
-import { ModalContextProps } from '../common/modal/modal-context-props';
-import { UserService } from '../../services/user/user.service';
-import { Button } from '../../models/button/button';
-import { ToastContext } from '../common/toast/toast-context';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { ToastContainer } from 'react-toastr';
+import { Button } from '../../models/button/button';
 import { HttpErrorResponse } from '../../models/common/http/error/http-error-response';
+import { UserService } from '../../services/user/user.service';
+import { ModalContext } from '../common/modal/modal-context';
+import { ModalContextProps } from '../common/modal/modal-context-props';
+import { ToastContext } from '../common/toast/toast-context';
+import Login from '../login/login';
+import { LoginProps } from '../login/login-props';
 import Registration from '../registration/registration';
 import { RegistrationProps } from '../registration/registration-props';
+import { TopBarState } from './top-bar-state';
+import './top-bar.scss';
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
   private static readonly DEFAULT_MODALS_CONF: Readonly<TopBarState> = {

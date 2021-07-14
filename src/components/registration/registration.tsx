@@ -1,7 +1,7 @@
-import './registration.scss';
 import React, { ChangeEvent } from 'react';
-import { RegistrationProps } from './registration-props';
 import { withTranslation, WithTranslation } from 'react-i18next';
+import { RegistrationProps } from './registration-props';
+import './registration.scss';
 
 class Registration extends React.Component<
   RegistrationProps & WithTranslation

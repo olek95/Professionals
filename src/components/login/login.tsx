@@ -1,7 +1,7 @@
-import './login.scss';
 import React, { ChangeEvent } from 'react';
-import { LoginProps } from './login-props';
 import { withTranslation, WithTranslation } from 'react-i18next';
+import { LoginProps } from './login-props';
+import './login.scss';
 
 class Login extends React.Component<LoginProps & WithTranslation> {
   render(): JSX.Element {

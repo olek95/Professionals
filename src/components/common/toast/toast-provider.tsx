@@ -1,5 +1,3 @@
-import { ToastContext } from './toast-context';
-import { ToastContainer, ToastMessageAnimated } from 'react-toastr';
 import {
   createFactory,
   PropsWithChildren,
@@ -7,6 +5,8 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { ToastContainer, ToastMessageAnimated } from 'react-toastr';
+import { ToastContext } from './toast-context';
 import './toast.scss';
 
 export const ToastProvider = (props: PropsWithChildren<{}>): JSX.Element => {

@@ -4,10 +4,10 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key.enum';
+import Modal from './modal';
 import { ModalConfiguration } from './modal-configuration';
 import { ModalContext } from './modal-context';
-import Modal from './modal';
-import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key.enum';
 
 export const ModalProvider = <T extends {}>(
   props: PropsWithChildren<{}>
