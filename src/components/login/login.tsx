@@ -1,13 +1,14 @@
 import './login.scss';
 import React, { ChangeEvent } from 'react';
 import { LoginProps } from './login-props';
+import { withTranslation, WithTranslation } from 'react-i18next';
 
-export class Login extends React.Component<LoginProps> {
+class Login extends React.Component<LoginProps & WithTranslation> {
   render(): JSX.Element {
     return (
       <div className='login'>
         <label>
-          Login:{' '}
+          {this.props.t('USER.LOGIN')}
           <input
             className='login-input'
             value={this.props.login}
@@ -15,7 +16,7 @@ export class Login extends React.Component<LoginProps> {
           />
         </label>
         <label className='login-password'>
-          Password:{' '}
+          {this.props.t('USER.PASSWORD')}
           <input
             type='password'
             className='login-password-input'
@@ -33,3 +34,5 @@ export class Login extends React.Component<LoginProps> {
   onPasswordChanged = (event: ChangeEvent<HTMLInputElement>): void =>
     this.props.passwordChange(event.target.value);
 }
+
+export default withTranslation()(Login);

@@ -1,7 +1,7 @@
 import './top-bar.scss';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import React, { Context, ReactNode } from 'react';
-import { Login } from '../login/login';
+import Login from '../login/login';
 import { TopBarState } from './top-bar-state';
 import { ModalContext } from '../common/modal/modal-context';
 import { LoginProps } from '../login/login-props';
@@ -11,13 +11,13 @@ import { Button } from '../../models/button/button';
 import { ToastContext } from '../common/toast/toast-context';
 import { ToastContainer } from 'react-toastr';
 import { HttpErrorResponse } from '../../models/common/http/error/http-error-response';
-import { Registration } from '../registration/registration';
+import Registration from '../registration/registration';
 import { RegistrationProps } from '../registration/registration-props';
 
 class TopBar extends React.Component<WithTranslation, TopBarState> {
   private static readonly DEFAULT_MODALS_CONF: Readonly<TopBarState> = {
     email: '',
-    disabledLogin: true,
+    disabledConfirmation: true,
     login: '',
     password: '',
   };
@@ -36,20 +36,24 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     super(props);
     this.state = TopBar.DEFAULT_MODALS_CONF;
     this.loginButton = {
-      disabled: this.state.disabledLogin,
+      disabled: this.state.disabledConfirmation,
       label: 'TOP_BAR.LOGIN_BUTTON',
       onClick: () =>
         UserService.login(this.state.login, this.state.password)
           .then(this.loginModal?.close)
-          .catch(this.onLoginError),
+          .catch(this.onError),
     };
     this.registerButton = {
-      disabled: false,
+      disabled: this.state.disabledConfirmation,
       label: 'TOP_BAR.SIGN_UP_BUTTON',
       onClick: () =>
-        UserService.signUp('test1', 'test2')
+        UserService.signUp(
+          this.state.login,
+          this.state.password,
+          this.state.email
+        )
           .then(this.registrationModal?.close)
-          .catch(this.onLoginError),
+          .catch(this.onError),
     };
   }
 
@@ -89,8 +93,10 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
       this.loginModal?.configure({
         body: Login,
         bodyParams: {
-          loginChange: this.onLoginChanged,
-          passwordChange: this.onPasswordChanged,
+          loginChange: (login) =>
+            this.onLoginChanged(login, this.updateLoginEnableState),
+          passwordChange: (password) =>
+            this.onPasswordChanged(password, this.updateLoginEnableState),
           login: this.state.login,
           password: this.state.password,
         },
@@ -103,6 +109,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
         ],
         rightButtons: [this.loginButton],
         onEnterPressed: this.loginButton.onClick,
+        onCancel: this.onLoginModalClose,
       })
     );
   };
@@ -114,8 +121,13 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
         bodyParams: {
           email: this.state.email,
           emailChange: this.onEmailChanged,
-          loginChange: this.onLoginChanged,
-          passwordChange: this.onPasswordChanged,
+          loginChange: (login) =>
+            this.onLoginChanged(login, this.updateRegistrationEnableState),
+          passwordChange: (password) =>
+            this.onPasswordChanged(
+              password,
+              this.updateRegistrationEnableState
+            ),
           login: this.state.login,
           password: this.state.password,
         },
@@ -123,66 +135,96 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
         leftButtons: [
           {
             label: 'COMMON.CANCEL_BUTTON',
-            onClick: this.registrationModal?.close,
+            onClick: this.onRegistrationModalClose,
           },
         ],
         rightButtons: [this.registerButton],
         onEnterPressed: this.registerButton.onClick,
+        onCancel: this.onRegistrationModalClose,
       });
     });
   };
 
-  private onLoginError = (error: HttpErrorResponse): void => {
+  private onError = (error: HttpErrorResponse): void => {
     this.context?.error(error.message, error.statusText);
   };
 
   private onEmailChanged = (email: string): void => {
-    this.setState({
-      email,
-    });
+    this.setState(
+      {
+        email,
+      },
+      this.updateRegistrationEnableState
+    );
   };
 
-  private onLoginChanged = (login: string): void => {
+  private onLoginChanged(login: string, updateEnableState: () => void): void {
     this.setState(
       {
         login,
       },
-      this.updateLoginEnableState
+      updateEnableState
     );
-  };
+  }
 
-  private onPasswordChanged = (password: string): void => {
+  private onPasswordChanged(password: string, updateEnableState: () => void) {
     this.setState(
       {
         password,
       },
-      this.updateLoginEnableState
+      updateEnableState
     );
-  };
+  }
 
   private updateLoginEnableState(): void {
     this.setState(
       (state) => ({
-        disabledLogin: !state.password || !state.login,
+        disabledConfirmation: !state.password || !state.login,
       }),
       this.updateLoginModal
     );
   }
 
   private updateLoginModal(): void {
-    this.loginButton.disabled = this.state.disabledLogin;
-    this.loginModal?.update({
-      bodyParams: {
-        login: this.state.login,
-        password: this.state.password,
-      },
-      rightButtons: [this.loginButton],
-    });
+    this.updateModal(this.loginButton);
   }
 
   private onLoginModalClose = (): void => {
     this.loginModal?.close();
     this.setState(TopBar.DEFAULT_MODALS_CONF, this.updateLoginModal);
+  };
+
+  private updateRegistrationEnableState(): void {
+    this.setState(
+      (state) => ({
+        disabledConfirmation: !state.password || !state.login || !state.email,
+      }),
+      this.updateRegistrationModal
+    );
+  }
+
+  private updateRegistrationModal(): void {
+    this.updateModal(this.registerButton, { email: this.state.email });
+  }
+
+  private updateModal(
+    confirmationButton: Button,
+    additionalParams?: Partial<RegistrationProps>
+  ): void {
+    confirmationButton.disabled = this.state.disabledConfirmation;
+    this.registrationModal?.update({
+      bodyParams: {
+        login: this.state.login,
+        password: this.state.password,
+        ...additionalParams,
+      },
+      rightButtons: [confirmationButton],
+    });
+  }
+
+  private onRegistrationModalClose = (): void => {
+    this.registrationModal?.close();
+    this.setState(TopBar.DEFAULT_MODALS_CONF, this.updateRegistrationModal);
   };
 }
 

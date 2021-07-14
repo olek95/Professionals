@@ -1,13 +1,16 @@
 import './registration.scss';
 import React, { ChangeEvent } from 'react';
 import { RegistrationProps } from './registration-props';
+import { withTranslation, WithTranslation } from 'react-i18next';
 
-export class Registration extends React.Component<RegistrationProps> {
+class Registration extends React.Component<
+  RegistrationProps & WithTranslation
+> {
   render(): JSX.Element {
     return (
       <div className='registration'>
         <label>
-          Login:{' '}
+          {this.props.t('USER.LOGIN')}
           <input
             className='registration-input'
             value={this.props.login}
@@ -15,7 +18,7 @@ export class Registration extends React.Component<RegistrationProps> {
           />
         </label>
         <label className='registration-password'>
-          Password:{' '}
+          {this.props.t('USER.PASSWORD')}
           <input
             type='password'
             className='registration-password-input'
@@ -24,7 +27,7 @@ export class Registration extends React.Component<RegistrationProps> {
           />
         </label>
         <label className='registration-email'>
-          Email:
+          {this.props.t('USER.EMAIL')}
           <input
             type='email'
             className='registration-email-input'
@@ -45,3 +48,5 @@ export class Registration extends React.Component<RegistrationProps> {
   onEmailChanged = (event: ChangeEvent<HTMLInputElement>): void =>
     this.props.emailChange(event.target.value);
 }
+
+export default withTranslation()(Registration);

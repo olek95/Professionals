@@ -7,5 +7,10 @@
     "LOGIN_TITLE": "Login",
     "REGISTRATION_TITLE": "Registration",
     "SIGN_UP_BUTTON": "Sign up"
+  },
+  "USER": {
+    "EMAIL": "Email:",
+    "LOGIN": "Login:",
+    "PASSWORD": "Password:"
   }
 }

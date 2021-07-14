@@ -10,10 +10,10 @@ export default class UserController {
   private static readonly SECRET_KEY = '123456789';
   private static URL = '/user';
   private static readonly LOGIN_URL = `${UserController.URL}/login`;
+  private static readonly USER_FILE_PATH = './src/db/users.json';
   private static readonly USER_DB: User[] = JSON.parse(
     UserController.readFileOrCreateIfNotExist()
   );
-  private static readonly USER_FILE_PATH = './src/db/users.json';
 
   static readonly ROUTES = [
     UserController.onLogin(),

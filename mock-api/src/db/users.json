@@ -1,6 +1,7 @@
 [
   {
     "login": "user",
-    "password": "password"
+    "password": "password",
+    "email": "user@mail.com"
   }
 ]

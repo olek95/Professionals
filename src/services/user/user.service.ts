@@ -1,52 +1,21 @@
-import { HttpErrorResponse } from '../../models/common/http/error/http-error-response';
-import { HttpError } from '../../models/common/http/error/http-error';
+import { HttpService } from '../common/http.service';
 
 export class UserService {
+  private static readonly URL = '/user';
+
   static login(login: string, password: string): Promise<string> {
-    return fetch('http://localhost:3001/user/login', {
-      body: JSON.stringify({
-        login: login,
-        password: password,
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => {
-      if (response.ok) {
-        return response.text();
-      }
-      return response.json().then((error: HttpError) => {
-        throw new HttpErrorResponse(
-          error.message,
-          error.status,
-          response.statusText
-        );
-      });
-    });
+    return HttpService.post(`${UserService.URL}/login`, { login, password });
   }
 
-  static signUp(login: string, password: string): Promise<string> {
-    return fetch('http://localhost:3001/user/register', {
-      body: JSON.stringify({
-        login: login,
-        password: password,
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => {
-      if (response.ok) {
-        return response.text();
-      }
-      return response.json().then((error: HttpError) => {
-        throw new HttpErrorResponse(
-          error.message,
-          error.status,
-          response.statusText
-        );
-      });
+  static signUp(
+    login: string,
+    password: string,
+    email: string
+  ): Promise<string> {
+    return HttpService.post(`${UserService.URL}/register`, {
+      login,
+      password,
+      email,
     });
   }
 }

@@ -5,7 +5,7 @@ export interface ModalConfiguration<T> {
   body: ComponentType<T>;
   bodyParams: T;
   leftButtons: Button[];
-  onEscPressed?: () => void;
+  onCancel?: () => void;
   onEnterPressed?: () => void;
   rightButtons: Button[];
   title: string;

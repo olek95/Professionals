@@ -31,17 +31,20 @@ export const ModalProvider = <T extends {}>(
     setConfiguration(undefined);
     setUpdatedConfiguration(undefined);
   }, []);
-  const { onEscPressed, onEnterPressed } = { ...finalConfiguration };
+  const { onCancel, onEnterPressed } = { ...finalConfiguration };
+  const closeAndUpdateModal = useCallback(() => {
+    close();
+    if (onCancel) {
+      onCancel();
+    }
+  }, [close, onCancel]);
   const onEscPress = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === KeyboardKey.ESCAPE) {
-        close();
-        if (onEscPressed) {
-          onEscPressed();
-        }
+        closeAndUpdateModal();
       }
     },
-    [close, onEscPressed]
+    [closeAndUpdateModal]
   );
   const onEnterPress = useCallback(
     (event: KeyboardEvent) => {
@@ -63,7 +66,7 @@ export const ModalProvider = <T extends {}>(
     >
       {finalConfiguration && (
         <Modal
-          close={close}
+          close={closeAndUpdateModal}
           title={finalConfiguration.title}
           leftButtons={finalConfiguration.leftButtons}
           rightButtons={finalConfiguration.rightButtons}
