@@ -7,6 +7,8 @@ import { HttpStatus } from '../../../../src/models/common/http/status/http-statu
 import { User } from '../../model/user/user';
 
 export default class UserController {
+  private static readonly DUPLICATED_EMAIL_ERROR = 'User with that email already exists';
+  private static readonly DUPLICATED_LOGIN_ERROR = 'User with that login already exists';
   private static readonly SECRET_KEY = '123456789';
   private static URL = '/user';
   private static readonly LOGIN_URL = `${UserController.URL}/login`;
@@ -98,21 +100,47 @@ export default class UserController {
   }
 
   private static onSignUp(): Router {
-    return Router().post(
+    return Router().post<ParamsDictionary, HttpError, User>(
       `${UserController.URL}/register`,
       (request, response) => {
+        const duplicationError = UserController.checkUserDuplication(request.body);
+        if (duplicationError) {
+          response.status(HttpStatus.CONFLICT).json({
+            status: HttpStatus.CONFLICT,
+            message: duplicationError
+          });
+        } else {
         UserController.USER_DB.push(request.body);
         fs.writeFile(
-          UserController.USER_FILE_PATH,
-          JSON.stringify(UserController.USER_DB, null, 2),
-          (err) => {
-            if (err) {
-              return;
+            UserController.USER_FILE_PATH,
+            JSON.stringify(UserController.USER_DB, null, 2),
+            (err) => {
+              if (err) {
+                return;
+              }
+              response.sendStatus(HttpStatus.OK);
             }
-            response.status(HttpStatus.OK);
-          }
         );
       }
+      }
     );
+  }
+
+  private static checkUserDuplication(user: User): string {
+    return UserController.USER_DB.reduce((errors: string[], savedUser) => {
+      if (user.login === savedUser.login) {
+        UserController.pushErrorIfNotExist(errors, UserController.DUPLICATED_LOGIN_ERROR);
+      }
+      if (user.email === savedUser.email) {
+        UserController.pushErrorIfNotExist(errors, UserController.DUPLICATED_EMAIL_ERROR);
+      }
+      return errors;
+    }, []).join('\r\n');
+  }
+
+  private static pushErrorIfNotExist(errors: string[], errorMessage: string): void {
+    if (!errors.includes(errorMessage)) {
+      errors.push(errorMessage);
+    }
   }
 }

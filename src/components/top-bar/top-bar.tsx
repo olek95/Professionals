@@ -52,7 +52,10 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
           this.state.password,
           this.state.email
         )
-          .then(this.registrationModal?.close)
+          .then(() => {
+            UserService.login(this.state.login, this.state.password).catch(this.onError);
+            this.registrationModal?.close();
+          })
           .catch(this.onError),
     };
   }
