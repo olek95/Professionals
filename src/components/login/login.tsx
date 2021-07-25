@@ -1,38 +1,33 @@
-import React, { ChangeEvent } from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import React from 'react';
+import Field from '../common/form/field/field';
+import { FieldType } from '../common/form/field/field-type';
 import { LoginProps } from './login-props';
 import './login.scss';
 
-class Login extends React.Component<LoginProps & WithTranslation> {
+export class Login extends React.Component<LoginProps> {
   render(): JSX.Element {
     return (
       <div className='login'>
-        <label>
-          {this.props.t('USER.LOGIN')}
-          <input
-            className='login-input'
-            value={this.props.login}
-            onChange={this.onLoginChanged}
-          />
-        </label>
-        <label className='login-password'>
-          {this.props.t('USER.PASSWORD')}
-          <input
-            type='password'
-            className='login-password-input'
-            value={this.props.password}
-            onChange={this.onPasswordChanged}
-          />
-        </label>
+        <Field
+          label='USER.LOGIN'
+          value={this.props.login}
+          onChange={this.onLoginChanged}
+          required
+        />
+        <Field
+          className='login-password'
+          label='USER.PASSWORD'
+          type={FieldType.PASSWORD}
+          value={this.props.password}
+          onChange={this.onPasswordChanged}
+          required
+        />
       </div>
     );
   }
 
-  onLoginChanged = (event: ChangeEvent<HTMLInputElement>): void =>
-    this.props.loginChange(event.target.value);
+  onLoginChanged = (login: string): void => this.props.loginChange(login);
 
-  onPasswordChanged = (event: ChangeEvent<HTMLInputElement>): void =>
-    this.props.passwordChange(event.target.value);
+  onPasswordChanged = (password: string): void =>
+    this.props.passwordChange(password);
 }
-
-export default withTranslation()(Login);

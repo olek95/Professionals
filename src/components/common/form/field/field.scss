@@ -1,0 +1,17 @@
+.field {
+  position: relative;
+
+  .field-input {
+    margin-left: 20px;
+    width: 420px;
+  }
+
+  .field-required {
+    top: 2px;
+    position: absolute;
+    height: 4px;
+    width: 4px;
+    border-radius: 50%;
+    background-color: red;
+  }
+}

@@ -1,6 +1,7 @@
 {
   "COMMON": {
-    "CANCEL_BUTTON": "Cancel"
+    "CANCEL_BUTTON": "Cancel",
+    "REQUIRED_ERROR": "That field can not be empty"
   },
   "TOP_BAR": {
     "LOGIN_BUTTON": "Sign in",

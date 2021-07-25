@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key.enum';
+import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key';
 import Modal from './modal';
 import { ModalConfiguration } from './modal-configuration';
 import { ModalContext } from './modal-context';

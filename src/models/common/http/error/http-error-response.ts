@@ -1,4 +1,4 @@
-import { HttpStatus } from '../status/http-status.enum';
+import { HttpStatus } from '../status/http-status';
 import { HttpError } from './http-error';
 
 export class HttpErrorResponse extends Error implements HttpError {

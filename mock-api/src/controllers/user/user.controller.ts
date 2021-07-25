@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import * as fs from 'fs';
 import { sign, verify } from 'jsonwebtoken';
 import { HttpError } from '../../../../src/models/common/http/error/http-error';
-import { HttpStatus } from '../../../../src/models/common/http/status/http-status.enum';
+import { HttpStatus } from '../../../../src/models/common/http/status/http-status';
 import { User } from '../../model/user/user';
 
 export default class UserController {

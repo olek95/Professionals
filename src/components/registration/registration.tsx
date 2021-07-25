@@ -1,52 +1,42 @@
-import React, { ChangeEvent } from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import React from 'react';
+import Field from '../common/form/field/field';
+import { FieldType } from '../common/form/field/field-type';
 import { RegistrationProps } from './registration-props';
 import './registration.scss';
 
-class Registration extends React.Component<
-  RegistrationProps & WithTranslation
-> {
+export class Registration extends React.Component<RegistrationProps> {
   render(): JSX.Element {
     return (
       <div className='registration'>
-        <label>
-          {this.props.t('USER.LOGIN')}
-          <input
-            className='registration-input'
-            value={this.props.login}
-            onChange={this.onLoginChanged}
-          />
-        </label>
-        <label className='registration-password'>
-          {this.props.t('USER.PASSWORD')}
-          <input
-            type='password'
-            className='registration-password-input'
-            value={this.props.password}
-            onChange={this.onPasswordChanged}
-          />
-        </label>
-        <label className='registration-email'>
-          {this.props.t('USER.EMAIL')}
-          <input
-            type='email'
-            className='registration-email-input'
-            value={this.props.email}
-            onChange={this.onEmailChanged}
-          />
-        </label>
+        <Field
+          label='USER.LOGIN'
+          value={this.props.login}
+          onChange={this.onLoginChanged}
+          required
+        />
+        <Field
+          label='USER.PASSWORD'
+          value={this.props.password}
+          onChange={this.onPasswordChanged}
+          type={FieldType.PASSWORD}
+          required
+          className='registration-password'
+        />
+        <Field
+          label='USER.EMAIL'
+          value={this.props.email}
+          onChange={this.onEmailChanged}
+          required
+          className='registration-email'
+        />
       </div>
     );
   }
 
-  onLoginChanged = (event: ChangeEvent<HTMLInputElement>): void =>
-    this.props.loginChange(event.target.value);
+  onLoginChanged = (login: string): void => this.props.loginChange(login);
 
-  onPasswordChanged = (event: ChangeEvent<HTMLInputElement>): void =>
-    this.props.passwordChange(event.target.value);
+  onPasswordChanged = (password: string): void =>
+    this.props.passwordChange(password);
 
-  onEmailChanged = (event: ChangeEvent<HTMLInputElement>): void =>
-    this.props.emailChange(event.target.value);
+  onEmailChanged = (email: string): void => this.props.emailChange(email);
 }
-
-export default withTranslation()(Registration);

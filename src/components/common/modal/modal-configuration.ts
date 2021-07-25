@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { Button } from '../../../models/button/button';
+import { Button } from '../../../models/common/button/button';
 
 export interface ModalConfiguration<T> {
   body: ComponentType<T>;
