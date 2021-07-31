@@ -1,6 +1,7 @@
 {
   "COMMON": {
     "CANCEL_BUTTON": "Cancel",
+    "EMAIL_ERROR": "Email has incorrect format",
     "REQUIRED_ERROR": "That field can not be empty"
   },
   "TOP_BAR": {

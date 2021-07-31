@@ -26,6 +26,7 @@ export class Registration extends React.Component<RegistrationProps> {
           label='USER.EMAIL'
           value={this.props.email}
           onChange={this.onEmailChanged}
+          type={FieldType.EMAIL}
           required
           className='registration-email'
         />

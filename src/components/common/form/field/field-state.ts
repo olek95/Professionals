@@ -2,6 +2,6 @@ import { FieldType } from './field-type';
 
 export interface FieldState {
   className: string;
-  error: string;
+  errors: string;
   type: FieldType;
 }

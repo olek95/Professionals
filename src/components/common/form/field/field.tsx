@@ -8,6 +8,8 @@ import { FieldType } from './field-type';
 import './field.scss';
 
 class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
+  private static readonly EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
   private static retrieveClassName(
     props: FieldProps & WithTranslation
   ): string {
@@ -17,20 +19,21 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
   }
 
   private static retrieveType(props: FieldProps & WithTranslation): FieldType {
-    return props.type || FieldType.TEXT;
+    return !props.type || props.type === FieldType.EMAIL
+      ? FieldType.TEXT
+      : props.type;
   }
 
   private static readonly FIELD_DEFAULT_CLASS = 'field';
-
-  private readonly inputRef = React.createRef<HTMLInputElement>();
 
   static getDerivedStateFromProps(
     props: FieldProps & WithTranslation,
     state: FieldState
   ): Partial<FieldState> | null {
     const nextState: Partial<FieldState> = {};
-    if (props.type !== state.type) {
-      nextState.type = Field.retrieveType(props);
+    const type = Field.retrieveType(props);
+    if (type !== state.type) {
+      nextState.type = type;
     }
     if (props.className !== state.className) {
       nextState.className = Field.retrieveClassName(props);
@@ -38,11 +41,16 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
     return Object.keys(nextState).length ? nextState : null;
   }
 
+  private readonly inputRef = React.createRef<HTMLInputElement>();
+
+  private validators: ((value: string) => string)[] = [];
+
   constructor(props: FieldProps & WithTranslation) {
     super(props);
+    this.setValidators();
     this.state = {
       className: Field.retrieveClassName(props),
-      error: this.getError(props.value),
+      errors: this.getError(props.value),
       type: Field.retrieveType(props),
     };
   }
@@ -54,7 +62,8 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
         {this.props.required && <span className='field-required' />}
         <input
           ref={this.inputRef}
-          data-tip={this.state.error}
+          data-class='field-input-tooltip'
+          data-tip={this.state.errors}
           data-type={TooltipType.ERROR}
           className='field-input'
           value={this.props.value}
@@ -72,27 +81,44 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
   };
 
   private getError(value: string): string {
-    return this.validateRequire(value)
-      ? this.props.t('COMMON.REQUIRED_ERROR')
-      : '';
+    return this.validators
+      .flatMap((validator) => validator(value) || [])
+      .join('\n');
   }
 
-  private validateRequire(value: string): boolean {
-    return !!this.props.required && !value.trim();
+  private validateRequire = (value: string): string => {
+    return value.trim() ? '' : this.props.t('COMMON.REQUIRED_ERROR');
+  };
+
+  private validateEmail = (email: string): string => {
+    return this.validateRequire(email) ||
+      Field.EMAIL_REGEX.test(email.toLowerCase())
+      ? ''
+      : this.props.t('COMMON.EMAIL_ERROR');
+  };
+
+  private setValidators(): void {
+    this.validators = [];
+    if (this.props.required) {
+      this.validators.push(this.validateRequire);
+    }
+    if (this.props.type === FieldType.EMAIL) {
+      this.validators.push(this.validateEmail);
+    }
   }
 
   private validateInput(value: string): void {
     let previousError: string;
     this.setState(
       (state) => {
-        previousError = state.error;
+        previousError = state.errors;
         return {
-          error: this.getError(value),
+          errors: this.getError(value),
         };
       },
       () => {
-        if (previousError !== this.state.error) {
-          this.state.error
+        if (previousError !== this.state.errors) {
+          this.state.errors
             ? ReactTooltip.show(this.inputRef.current as HTMLInputElement)
             : ReactTooltip.hide();
         }
