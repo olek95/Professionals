@@ -5,10 +5,12 @@ import { TooltipType } from '../../../../models/common/tooltip/tooltip-type';
 import { FieldProps } from './field-props';
 import { FieldState } from './field-state';
 import { FieldType } from './field-type';
+import { FieldValidator } from './field-validator';
 import './field.scss';
+import { Validator } from './validator';
 
 class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
-  private static readonly EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  private static readonly FIELD_DEFAULT_CLASS = 'field';
 
   private static retrieveClassName(
     props: FieldProps & WithTranslation
@@ -24,7 +26,38 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
       : props.type;
   }
 
-  private static readonly FIELD_DEFAULT_CLASS = 'field';
+  private static isRequiredPropertyChanged(
+    required: boolean | undefined,
+    validators: Validator[]
+  ): boolean {
+    return (
+      (required && !validators.includes(FieldValidator.validateRequire)) ||
+      (!required && validators.includes(FieldValidator.validateRequire))
+    );
+  }
+
+  private static getUpdatedValidators(
+    props: FieldProps,
+    actualValidators: Validator[]
+  ): ((value: string) => string)[] | undefined {
+    const validators: Validator[] = [];
+    if (props.required) {
+      validators.push(FieldValidator.validateRequire);
+    }
+    if (props.type === FieldType.EMAIL) {
+      validators.push(FieldValidator.validateEmail);
+    }
+    if (
+      validators.length !== actualValidators.length ||
+      !validators.every((validator) => actualValidators.includes(validator))
+    ) {
+      return validators;
+    }
+  }
+
+  private static getError(value: string, validators: Validator[]): string {
+    return validators.flatMap((validator) => validator(value) || []).join('\n');
+  }
 
   static getDerivedStateFromProps(
     props: FieldProps & WithTranslation,
@@ -35,6 +68,16 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
     if (type !== state.type) {
       nextState.type = type;
     }
+    if (
+      type !== state.type ||
+      Field.isRequiredPropertyChanged(props.required, state.validators)
+    ) {
+      const validators = Field.getUpdatedValidators(props, state.validators);
+      if (validators) {
+        nextState.validators = validators;
+        nextState.errors = Field.getError('', nextState.validators);
+      }
+    }
     if (props.className !== state.className) {
       nextState.className = Field.retrieveClassName(props);
     }
@@ -43,19 +86,17 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
 
   private readonly inputRef = React.createRef<HTMLInputElement>();
 
-  private validators: ((value: string) => string)[] = [];
-
   constructor(props: FieldProps & WithTranslation) {
     super(props);
-    this.setValidators();
     this.state = {
       className: Field.retrieveClassName(props),
-      errors: this.getError(props.value),
-      type: Field.retrieveType(props),
+      errors: '',
+      type: FieldType.TEXT,
+      validators: [],
     };
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <label className={this.state.className}>
         {this.props.t(this.props.label)}
@@ -80,40 +121,13 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
     this.props.onChange(event.target.value);
   };
 
-  private getError(value: string): string {
-    return this.validators
-      .flatMap((validator) => validator(value) || [])
-      .join('\n');
-  }
-
-  private validateRequire = (value: string): string => {
-    return value.trim() ? '' : this.props.t('COMMON.REQUIRED_ERROR');
-  };
-
-  private validateEmail = (email: string): string => {
-    return this.validateRequire(email) ||
-      Field.EMAIL_REGEX.test(email.toLowerCase())
-      ? ''
-      : this.props.t('COMMON.EMAIL_ERROR');
-  };
-
-  private setValidators(): void {
-    this.validators = [];
-    if (this.props.required) {
-      this.validators.push(this.validateRequire);
-    }
-    if (this.props.type === FieldType.EMAIL) {
-      this.validators.push(this.validateEmail);
-    }
-  }
-
   private validateInput(value: string): void {
     let previousError: string;
     this.setState(
       (state) => {
         previousError = state.errors;
         return {
-          errors: this.getError(value),
+          errors: Field.getError(value, state.validators),
         };
       },
       () => {
