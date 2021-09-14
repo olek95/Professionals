@@ -59,24 +59,32 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
     return validators.flatMap((validator) => validator(value) || []).join('\n');
   }
 
+  private static isTypeChanged(
+    actualType: FieldType | undefined,
+    previousType: FieldType
+  ): boolean {
+    return (actualType || FieldType.TEXT) !== previousType;
+  }
+
   static getDerivedStateFromProps(
     props: FieldProps & WithTranslation,
     state: FieldState
   ): Partial<FieldState> | null {
     const nextState: Partial<FieldState> = {};
     const type = Field.retrieveType(props);
-    if (props.type !== state.originType) {
+    const changedType = Field.isTypeChanged(props.type, state.originType);
+    if (changedType) {
       nextState.type = type;
       nextState.originType = props.type;
     }
     if (
-      props.type !== state.originType ||
+      changedType ||
       Field.isRequiredPropertyChanged(props.required, state.validators)
     ) {
       const validators = Field.getUpdatedValidators(props, state.validators);
       if (validators) {
         nextState.validators = validators;
-        nextState.errors = Field.getError('', nextState.validators);
+        nextState.errors = Field.getError(props.value, nextState.validators);
       }
     }
     if (props.className !== state.className) {
