@@ -87,8 +87,9 @@ class Field extends React.Component<FieldProps & WithTranslation, FieldState> {
         nextState.errors = Field.getError(props.value, nextState.validators);
       }
     }
-    if (props.className !== state.className) {
-      nextState.className = Field.retrieveClassName(props);
+    const className = Field.retrieveClassName(props);
+    if (className !== state.className) {
+      nextState.className = className;
     }
     return Object.keys(nextState).length ? nextState : null;
   }

@@ -1184,46 +1184,786 @@ describe('Field', () => {
       expect(getDerivedStateFromProps).toBeDefined();
     });
 
-    describe('state of type', () => {
-      [
-        {
-          originType: FieldType.TEXT,
-          type: FieldType.TEXT,
-          previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
-        },
-        {
-          originType: FieldType.EMAIL,
-          type: FieldType.TEXT,
-          previousTypes: [FieldType.TEXT, FieldType.PASSWORD],
-        },
-        {
-          originType: FieldType.PASSWORD,
-          type: FieldType.PASSWORD,
-          previousTypes: [FieldType.TEXT, FieldType.EMAIL],
-        },
-        {
-          originType: undefined,
-          type: FieldType.TEXT,
-          previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
-        },
-      ].forEach((testScenario) => {
-        testScenario.previousTypes.forEach((previousType) => {
-          it(`should set type to ${testScenario.type} and originType to ${testScenario.originType} if actual type is ${testScenario.originType} and previous originType was ${previousType}`, () => {
-            // given
-            fieldProps.type = testScenario.originType;
-            fieldState.originType = previousType;
+    [
+      {
+        originType: FieldType.TEXT,
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+      },
+      {
+        originType: FieldType.EMAIL,
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.TEXT, FieldType.PASSWORD],
+      },
+      {
+        originType: FieldType.PASSWORD,
+        type: FieldType.PASSWORD,
+        previousTypes: [FieldType.TEXT, FieldType.EMAIL],
+      },
+      {
+        originType: undefined,
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+      },
+    ].forEach((testScenario) => {
+      testScenario.previousTypes.forEach((previousType) => {
+        it(`should set type to ${testScenario.type} and originType to ${testScenario.originType} if actual type is ${testScenario.originType} and previous originType was ${previousType}`, () => {
+          // given
+          fieldProps.type = testScenario.originType;
+          fieldState.originType = previousType;
 
-            // when
-            const state = FieldComponent.getDerivedStateFromProps!(
-              fieldProps,
-              fieldState
-            );
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
 
-            // then
-            expect(state?.type).toBe(testScenario.type);
-            expect(state?.originType).toBe(testScenario.originType);
-          });
+          // then
+          expect(state?.type).toBe(testScenario.type);
+          expect(state?.originType).toBe(testScenario.originType);
         });
+      });
+    });
+
+    [FieldType.TEXT, FieldType.PASSWORD, FieldType.EMAIL].forEach((type) => {
+      it(`should not set type and originType if new type is ${type} and originType was ${type}`, () => {
+        // given
+        fieldProps.type = type;
+        fieldState.originType = type;
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(state?.type).toBeUndefined();
+        expect(state?.originType).toBeUndefined();
+      });
+    });
+
+    it(`should not set type and originType if new type is undefined and originType was ${FieldType.TEXT}`, () => {
+      // given
+      fieldProps.type = undefined;
+      fieldState.originType = FieldType.TEXT;
+
+      // when
+      const state = FieldComponent.getDerivedStateFromProps!(
+        fieldProps,
+        fieldState
+      );
+
+      // then
+      expect(state?.type).toBeUndefined();
+      expect(state?.originType).toBeUndefined();
+    });
+
+    [
+      {
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+        validators: [FieldValidator.validateRequire],
+        validatorsNames: 'require validator',
+      },
+      {
+        type: FieldType.EMAIL,
+        previousTypes: [FieldType.TEXT, FieldType.PASSWORD],
+        validators: [
+          FieldValidator.validateRequire,
+          FieldValidator.validateEmail,
+        ],
+        validatorsNames: 'email and require validators',
+      },
+      {
+        type: FieldType.PASSWORD,
+        previousTypes: [FieldType.TEXT, FieldType.EMAIL],
+        validators: [FieldValidator.validateRequire],
+        validatorsNames: 'require validator',
+      },
+      {
+        type: undefined,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD, FieldType.TEXT],
+        validators: [FieldValidator.validateRequire],
+        validatorsNames: 'require validator',
+      },
+    ].forEach((testScenario) => {
+      testScenario.previousTypes.forEach((previousType) => {
+        it(`should assign ${testScenario.validatorsNames} if actual type is ${testScenario.type}, previous type was ${previousType}, required is true and previously there was not require validator`, () => {
+          // given
+          fieldProps.type = testScenario.type;
+          fieldProps.required = true;
+          fieldState.originType = previousType;
+          fieldState.validators = [];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(state?.validators).toEqual(testScenario.validators);
+        });
+      });
+    });
+
+    [FieldType.TEXT, FieldType.PASSWORD, FieldType.EMAIL].forEach((type) => {
+      [false, undefined].forEach((required) => {
+        it(`should not set validators if new type is ${type}, originType was ${type}, required is ${required} and previously there was not require validator`, () => {
+          // given
+          fieldProps.type = type;
+          fieldProps.required = required;
+          fieldState.originType = type;
+          fieldState.validators = [];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(state?.validators).toBeUndefined();
+        });
+      });
+
+      it(`should set validators if new type is ${type}, originType was ${type}, require is true and previously there was not require validator`, () => {
+        // given
+        fieldProps.type = type;
+        fieldProps.required = true;
+        fieldState.originType = type;
+        fieldState.validators = [];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        const validators = [FieldValidator.validateRequire];
+        if (type === FieldType.EMAIL) {
+          validators.push(FieldValidator.validateEmail);
+        }
+        expect(state?.validators).toEqual(validators);
+      });
+    });
+
+    [false, undefined].forEach((required) => {
+      it(`should set validators if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is ${required} and previously there was require validator`, () => {
+        // given
+        fieldProps.type = FieldType.EMAIL;
+        fieldProps.required = required;
+        fieldState.originType = FieldType.EMAIL;
+        fieldState.validators = [FieldValidator.validateRequire];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(state?.validators).toEqual([FieldValidator.validateEmail]);
+      });
+
+      [FieldType.TEXT, FieldType.PASSWORD].forEach((type) => {
+        it(`should not set validators if new type is ${type}, originType was ${type}, required is changed to ${required} and previously there was require validator`, () => {
+          // given
+          fieldProps.type = type;
+          fieldProps.required = required;
+          fieldState.originType = type;
+          fieldState.validators = [FieldValidator.validateRequire];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(state?.validators).toEqual([]);
+        });
+
+        it(`should assign email validator if actual type is ${FieldType.EMAIL}, previous type was ${type}, required is ${required} and previously there was require validator`, () => {
+          // given
+          fieldProps.type = FieldType.EMAIL;
+          fieldProps.required = required;
+          fieldState.originType = type;
+          fieldState.validators = [FieldValidator.validateRequire];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(state?.validators).toEqual([FieldValidator.validateEmail]);
+        });
+      });
+
+      it(`should not set validators if new type is undefined, originType was ${FieldType.TEXT}, required is ${required} and previously there was not require validator`, () => {
+        // given
+        fieldProps.type = undefined;
+        fieldProps.required = required;
+        fieldState.originType = FieldType.TEXT;
+        fieldState.validators = [];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(state?.validators).toBeUndefined();
+      });
+    });
+
+    it(`should not set validators if new type is undefined, originType was ${FieldType.TEXT}, required is false and previously there was require validator`, () => {
+      // given
+      fieldProps.type = undefined;
+      fieldProps.required = false;
+      fieldState.originType = FieldType.TEXT;
+      fieldState.validators = [];
+
+      // when
+      const state = FieldComponent.getDerivedStateFromProps!(
+        fieldProps,
+        fieldState
+      );
+
+      // then
+      expect(state?.validators).toBeUndefined();
+    });
+
+    [
+      {
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+        errorsNames: 'require error',
+        requireError: 'This field is required',
+        emailError: '',
+        expectedErrors: 'This field is required',
+      },
+      {
+        type: FieldType.TEXT,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+        errorsNames: 'empty errors',
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: FieldType.EMAIL,
+        previousTypes: [FieldType.TEXT, FieldType.PASSWORD],
+        errorsNames: 'email and require errors',
+        requireError: 'This field is required',
+        emailError: 'Incorrect email format',
+        expectedErrors: 'This field is required\nIncorrect email format',
+      },
+      {
+        type: FieldType.EMAIL,
+        previousTypes: [FieldType.TEXT, FieldType.PASSWORD],
+        errorsNames: 'empty errors',
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: FieldType.PASSWORD,
+        previousTypes: [FieldType.TEXT, FieldType.EMAIL],
+        errorsNames: 'require error',
+        requireError: 'This field is required',
+        emailError: '',
+        expectedErrors: 'This field is required',
+      },
+      {
+        type: FieldType.PASSWORD,
+        previousTypes: [FieldType.TEXT, FieldType.EMAIL],
+        errorsNames: 'empty errors',
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: undefined,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+        errorsNames: 'require error',
+        requireError: 'This field is required',
+        emailError: '',
+        expectedErrors: 'This field is required',
+      },
+      {
+        type: undefined,
+        previousTypes: [FieldType.EMAIL, FieldType.PASSWORD],
+        errorsNames: 'empty errors',
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+    ].forEach((testScenario) => {
+      testScenario.previousTypes.forEach((previousType) => {
+        it(`should assign ${testScenario.errorsNames} if actual type is ${
+          testScenario.type
+        }, previous type was ${previousType}, required is true, email validator returns ${
+          testScenario.emailError ? 'error' : 'no error'
+        }, require validator returns ${
+          testScenario.requireError ? 'error' : 'no error'
+        } and previously there was not require validator`, () => {
+          // given
+          const emailValidatorSpy = jest
+            .spyOn(FieldValidator, 'validateEmail')
+            .mockReturnValue(testScenario.emailError);
+          const requireValidatorSpy = jest
+            .spyOn(FieldValidator, 'validateRequire')
+            .mockReturnValue(testScenario.requireError);
+          fieldProps.type = testScenario.type;
+          const value = 'Some value';
+          fieldProps.value = value;
+          fieldProps.required = true;
+          fieldState.originType = previousType;
+          fieldState.validators = [];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(requireValidatorSpy).toHaveBeenCalledWith(value);
+          testScenario.type === FieldType.EMAIL
+            ? expect(emailValidatorSpy).toHaveBeenCalledWith(value)
+            : expect(emailValidatorSpy).not.toHaveBeenCalled();
+          expect(state?.errors).toEqual(testScenario.expectedErrors);
+        });
+      });
+    });
+
+    [FieldType.TEXT, FieldType.PASSWORD, FieldType.EMAIL].forEach((type) => {
+      [false, undefined].forEach((required) => {
+        it(`should not assign errors if new type is ${type}, originType was ${type}, required is ${required} and previously there was not require validator`, () => {
+          // given
+          jest
+            .spyOn(FieldValidator, 'validateRequire')
+            .mockReturnValue('This field is required');
+          jest
+            .spyOn(FieldValidator, 'validateEmail')
+            .mockReturnValue('Incorrect email format');
+          fieldProps.type = type;
+          fieldProps.required = required;
+          fieldState.originType = type;
+          fieldState.validators = [];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+          expect(FieldValidator.validateEmail).not.toHaveBeenCalled();
+          expect(state?.errors).toBeUndefined();
+        });
+      });
+
+      it(`should assign errors if new type is ${type}, originType was ${type}, require is true and previously there was not require validator`, () => {
+        // given
+        const value = 'Some value';
+        const requireError = 'This field is required';
+        const emailError = 'Incorrect email format';
+        jest
+          .spyOn(FieldValidator, 'validateRequire')
+          .mockReturnValue(requireError);
+        jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue(emailError);
+        fieldProps.type = type;
+        fieldProps.required = true;
+        fieldProps.value = value;
+        fieldState.originType = type;
+        fieldState.validators = [];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        let errors = requireError;
+        if (type === FieldType.EMAIL) {
+          expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+          errors += `\n${emailError}`;
+        } else {
+          expect(FieldValidator.validateEmail).not.toHaveBeenCalled();
+        }
+        expect(FieldValidator.validateRequire).toHaveBeenCalledWith(value);
+        expect(state?.errors).toEqual(errors);
+      });
+    });
+
+    [
+      {
+        type: FieldType.TEXT,
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: FieldType.PASSWORD,
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: FieldType.EMAIL,
+        requireError: '',
+        emailError: '',
+        expectedErrors: '',
+      },
+      {
+        type: FieldType.EMAIL,
+        requireError: 'This field is required',
+        emailError: '',
+        expectedErrors: 'This field is required',
+      },
+      {
+        type: FieldType.EMAIL,
+        requireError: '',
+        emailError: 'Incorrect email format',
+        expectedErrors: 'Incorrect email format',
+      },
+    ].forEach((testScenario) => {
+      it(`should assign empty errors if new type is ${testScenario.type}, originType was ${testScenario.type}, require is true, required and email validators return empty string and previously there was not require validator`, () => {
+        // given
+        const value = 'Some value';
+        jest
+          .spyOn(FieldValidator, 'validateRequire')
+          .mockReturnValue(testScenario.requireError);
+        jest
+          .spyOn(FieldValidator, 'validateEmail')
+          .mockReturnValue(testScenario.emailError);
+        fieldProps.type = testScenario.type;
+        fieldProps.required = true;
+        fieldProps.value = value;
+        fieldState.originType = testScenario.type;
+        fieldState.validators = [];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        const expectation = expect(FieldValidator.validateEmail);
+        testScenario.type === FieldType.EMAIL
+          ? expectation.toHaveBeenCalledWith(value)
+          : expectation.not.toHaveBeenCalled();
+        expect(FieldValidator.validateRequire).toHaveBeenCalledWith(value);
+        expect(state?.errors).toEqual(testScenario.expectedErrors);
+      });
+    });
+
+    it(`should assign only required error if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is true, require validator returns error, email validator returns empty string, and previously there was not require validator`, () => {
+      // given
+      const value = 'Some value';
+      const error = 'This field is required';
+      jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue(error);
+      jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+      fieldProps.type = FieldType.EMAIL;
+      fieldProps.required = true;
+      fieldProps.value = value;
+      fieldState.originType = FieldType.EMAIL;
+      fieldState.validators = [];
+
+      // when
+      const state = FieldComponent.getDerivedStateFromProps!(
+        fieldProps,
+        fieldState
+      );
+
+      // then
+      expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+      expect(FieldValidator.validateRequire).toHaveBeenCalledWith(value);
+      expect(state?.errors).toEqual(error);
+    });
+
+    it(`should assign only email error if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is true, require validator returns empty string, email validator returns error, and previously there was not require validator`, () => {
+      // given
+      const value = 'Some value';
+      const error = 'Incorrect email format';
+      jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
+      jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue(error);
+      fieldProps.type = FieldType.EMAIL;
+      fieldProps.required = true;
+      fieldProps.value = value;
+      fieldState.originType = FieldType.EMAIL;
+      fieldState.validators = [];
+
+      // when
+      const state = FieldComponent.getDerivedStateFromProps!(
+        fieldProps,
+        fieldState
+      );
+
+      // then
+      expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+      expect(FieldValidator.validateRequire).toHaveBeenCalledWith(value);
+      expect(state?.errors).toEqual(error);
+    });
+
+    [false, undefined].forEach((required) => {
+      it(`should assign errors if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is ${required} and previously there was require validator`, () => {
+        // given
+        const value = 'Some value';
+        const error = 'Incorrect email format';
+        jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
+        jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue(error);
+        fieldProps.type = FieldType.EMAIL;
+        fieldProps.required = required;
+        fieldProps.value = value;
+        fieldState.originType = FieldType.EMAIL;
+        fieldState.validators = [FieldValidator.validateRequire];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+        expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+        expect(state?.errors).toEqual(error);
+      });
+
+      it(`should assign empty errors if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is ${required}, email validator returns empty string and previously there was require validator`, () => {
+        // given
+        const value = 'Some value';
+        jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
+        jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+        fieldProps.type = FieldType.EMAIL;
+        fieldProps.required = required;
+        fieldProps.value = value;
+        fieldState.originType = FieldType.EMAIL;
+        fieldState.validators = [FieldValidator.validateRequire];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+        expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+        expect(state?.errors).toEqual('');
+      });
+
+      [FieldType.TEXT, FieldType.PASSWORD].forEach((type) => {
+        it(`should assign empty errors if new type is ${type}, originType was ${type}, required is changed to ${required} and previously there was require validator`, () => {
+          // given
+          jest
+            .spyOn(FieldValidator, 'validateRequire')
+            .mockReturnValue('This field is required');
+          jest
+            .spyOn(FieldValidator, 'validateEmail')
+            .mockReturnValue('Incorrect email format');
+          fieldProps.type = type;
+          fieldProps.required = required;
+          fieldProps.value = 'Some value';
+          fieldState.originType = type;
+          fieldState.validators = [FieldValidator.validateRequire];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+          expect(FieldValidator.validateEmail).not.toHaveBeenCalled();
+          expect(state?.errors).toBe('');
+        });
+
+        it(`should assign email error if actual type is ${FieldType.EMAIL}, previous type was ${type}, required is ${required} and previously there was require validator`, () => {
+          // given
+          const emailError = 'Incorrect email format';
+          const value = 'Some value';
+          jest
+            .spyOn(FieldValidator, 'validateRequire')
+            .mockReturnValue('This field is required');
+          jest
+            .spyOn(FieldValidator, 'validateEmail')
+            .mockReturnValue(emailError);
+          fieldProps.type = FieldType.EMAIL;
+          fieldProps.required = required;
+          fieldProps.value = value;
+          fieldState.originType = type;
+          fieldState.validators = [FieldValidator.validateRequire];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+          expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+          expect(state?.errors).toBe(emailError);
+        });
+
+        it(`should empty errors if actual type is ${FieldType.EMAIL}, previous type was ${type}, required is ${required}, email validator returns empty string and previously there was require validator`, () => {
+          // given
+          const value = 'Some value';
+          jest
+            .spyOn(FieldValidator, 'validateRequire')
+            .mockReturnValue('This field is required');
+          jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+          fieldProps.type = FieldType.EMAIL;
+          fieldProps.required = required;
+          fieldProps.value = value;
+          fieldState.originType = type;
+          fieldState.validators = [FieldValidator.validateRequire];
+
+          // when
+          const state = FieldComponent.getDerivedStateFromProps!(
+            fieldProps,
+            fieldState
+          );
+
+          // then
+          expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+          expect(FieldValidator.validateEmail).toHaveBeenCalledWith(value);
+          expect(state?.errors).toBe('');
+        });
+      });
+
+      it(`should not assign errors if new type is undefined, originType was ${FieldType.TEXT}, required is ${required} and previously there was not require validator`, () => {
+        // given
+        jest
+          .spyOn(FieldValidator, 'validateRequire')
+          .mockReturnValue('This field is required');
+        jest
+          .spyOn(FieldValidator, 'validateEmail')
+          .mockReturnValue('Incorrect email format');
+        fieldProps.type = undefined;
+        fieldProps.required = required;
+        fieldProps.value = 'Some value';
+        fieldState.originType = FieldType.TEXT;
+        fieldState.validators = [];
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+        expect(FieldValidator.validateEmail).not.toHaveBeenCalled();
+        expect(state?.errors).toBeUndefined();
+      });
+    });
+
+    it(`should not assign errors if new type is undefined, originType was ${FieldType.TEXT}, required is false and previously there was require validator`, () => {
+      // given
+      jest
+        .spyOn(FieldValidator, 'validateRequire')
+        .mockReturnValue('This field is required');
+      jest
+        .spyOn(FieldValidator, 'validateEmail')
+        .mockReturnValue('Incorrect email format');
+      fieldProps.type = undefined;
+      fieldProps.required = false;
+      fieldProps.value = 'Some value';
+      fieldState.originType = FieldType.TEXT;
+      fieldState.validators = [];
+
+      // when
+      const state = FieldComponent.getDerivedStateFromProps!(
+        fieldProps,
+        fieldState
+      );
+
+      // then
+      expect(FieldValidator.validateRequire).not.toHaveBeenCalled();
+      expect(FieldValidator.validateEmail).not.toHaveBeenCalled();
+      expect(state?.errors).toBeUndefined();
+    });
+
+    [
+      {
+        newClassName: 'some-class',
+        oldClassName: 'field other-class',
+        expectedClassName: 'field some-class',
+        description:
+          'new class name is different than old class name with default class name',
+      },
+      {
+        newClassName: undefined,
+        oldClassName: 'field some-class',
+        expectedClassName: 'field',
+        description:
+          'new class name is undefined and old class name is together with default class name',
+      },
+      {
+        newClassName: 'some-class',
+        oldClassName: 'field',
+        expectedClassName: 'field some-class',
+        description:
+          'new class name is different than old class name without default class name',
+      },
+    ].forEach((testScenario) => {
+      it(`should change className if ${testScenario.description}`, () => {
+        // given
+        fieldProps.className = testScenario.newClassName;
+        fieldState.className = testScenario.oldClassName;
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(state?.className).toBe(testScenario.expectedClassName);
+      });
+    });
+
+    [
+      {
+        newClassName: 'some-class',
+        oldClassName: 'field some-class',
+        description:
+          'new class name is the same like old class name with default class name',
+      },
+      {
+        newClassName: undefined,
+        oldClassName: 'field',
+        description:
+          'new class name is undefined and old class name is default',
+      },
+    ].forEach((testScenario) => {
+      it(`should not assign className if ${testScenario.description}`, () => {
+        // given
+        fieldProps.className = testScenario.newClassName;
+        fieldState.className = testScenario.oldClassName;
+
+        // when
+        const state = FieldComponent.getDerivedStateFromProps!(
+          fieldProps,
+          fieldState
+        );
+
+        // then
+        expect(state).toBeNull();
       });
     });
   });
