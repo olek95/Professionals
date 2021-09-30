@@ -28,7 +28,7 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-jest.mock('react-tooltip', () => () => <div data-testid='react-tooltip'></div>);
+jest.mock('react-tooltip', () => () => <div data-testid='react-tooltip' />);
 
 describe('Field', () => {
   beforeEach(() => {
@@ -222,9 +222,14 @@ describe('Field', () => {
         });
 
         describe('onChange', () => {
+          let onChange: jest.Mock<void, string[]>;
+
+          beforeEach(() => {
+            onChange = jest.fn<void, string[]>();
+          });
+
           it('should call onChange from props on change event', () => {
             // given
-            const onChange = jest.fn<void, string[]>();
             act(() => {
               ReactDOM.render(
                 <Field label='' value='' onChange={onChange} />,
@@ -244,9 +249,6 @@ describe('Field', () => {
           });
 
           it('should not call onChange from props if onChange event is not triggered', () => {
-            // given
-            const onChange = jest.fn<void, string[]>();
-
             // when
             act(() => {
               ReactDOM.render(
@@ -260,6 +262,17 @@ describe('Field', () => {
           });
 
           describe('Displaying error', () => {
+            let requireValidatorSpy: jest.SpyInstance<string, string[]>;
+            let emailValidatorSpy: jest.SpyInstance<string, string[]>;
+
+            beforeEach(() => {
+              requireValidatorSpy = jest.spyOn(
+                FieldValidator,
+                'validateRequire'
+              );
+              emailValidatorSpy = jest.spyOn(FieldValidator, 'validateEmail');
+            });
+
             [
               {
                 type: FieldType.TEXT,
@@ -296,14 +309,6 @@ describe('Field', () => {
                 testScenario.emailError ? 'error' : 'empty string'
               }`, () => {
                 // given
-                const requireValidatorSpy = jest.spyOn(
-                  FieldValidator,
-                  'validateRequire'
-                );
-                const emailValidatorSpy = jest.spyOn(
-                  FieldValidator,
-                  'validateEmail'
-                );
                 act(() => {
                   ReactDOM.render(
                     <Field
@@ -316,7 +321,6 @@ describe('Field', () => {
                     container
                   );
                 });
-                ReactTooltip.show = jest.fn();
                 const value = '';
                 const requireError = 'This field is required';
                 requireValidatorSpy.mockReturnValue(requireError);
@@ -374,14 +378,6 @@ describe('Field', () => {
                 testScenario.requireError ? 'error' : 'empty string'
               }`, () => {
                 // given
-                const requireValidatorSpy = jest.spyOn(
-                  FieldValidator,
-                  'validateRequire'
-                );
-                const emailValidatorSpy = jest.spyOn(
-                  FieldValidator,
-                  'validateEmail'
-                );
                 act(() => {
                   ReactDOM.render(
                     <Field
@@ -394,7 +390,6 @@ describe('Field', () => {
                     container
                   );
                 });
-                ReactTooltip.show = jest.fn();
                 const value = 'Some email';
                 const emailError = 'Email has incorrect format';
                 emailValidatorSpy.mockReturnValue(emailError);
@@ -428,14 +423,6 @@ describe('Field', () => {
 
             it('should set required and email errors to data tip if field is required, has email type and both validators return error', () => {
               // given
-              const requireValidatorSpy = jest.spyOn(
-                FieldValidator,
-                'validateRequire'
-              );
-              const emailValidatorSpy = jest.spyOn(
-                FieldValidator,
-                'validateEmail'
-              );
               act(() => {
                 ReactDOM.render(
                   <Field
@@ -448,7 +435,6 @@ describe('Field', () => {
                   container
                 );
               });
-              ReactTooltip.show = jest.fn();
               const value = 'Some other value';
               const emailError = 'Email has incorrect format';
               emailValidatorSpy.mockReturnValue(emailError);
@@ -536,14 +522,6 @@ describe('Field', () => {
                   emailTestScenario.emailError ? 'error' : 'empty string'
                 }`, () => {
                   // given
-                  const requireValidatorSpy = jest.spyOn(
-                    FieldValidator,
-                    'validateRequire'
-                  );
-                  const emailValidatorSpy = jest.spyOn(
-                    FieldValidator,
-                    'validateEmail'
-                  );
                   act(() => {
                     ReactDOM.render(
                       <Field
@@ -556,7 +534,6 @@ describe('Field', () => {
                       container
                     );
                   });
-                  ReactTooltip.show = jest.fn();
                   const value = 'Some other value';
                   emailValidatorSpy.mockReturnValue(
                     emailTestScenario.emailError
@@ -1527,6 +1504,14 @@ describe('Field', () => {
     });
 
     describe('Errors change', () => {
+      let emailValidatorSpy: jest.SpyInstance<string, string[]>;
+      let requireValidatorSpy: jest.SpyInstance<string, string[]>;
+
+      beforeEach(() => {
+        emailValidatorSpy = jest.spyOn(FieldValidator, 'validateEmail');
+        requireValidatorSpy = jest.spyOn(FieldValidator, 'validateRequire');
+      });
+
       [
         {
           type: FieldType.TEXT,
@@ -1602,12 +1587,8 @@ describe('Field', () => {
             testScenario.requireError ? 'error' : 'no error'
           } and previously there was not require validator`, () => {
             // given
-            const emailValidatorSpy = jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue(testScenario.emailError);
-            const requireValidatorSpy = jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue(testScenario.requireError);
+            emailValidatorSpy.mockReturnValue(testScenario.emailError);
+            requireValidatorSpy.mockReturnValue(testScenario.requireError);
             fieldProps.type = testScenario.type;
             const value = 'Some value';
             fieldProps.value = value;
@@ -1706,12 +1687,8 @@ describe('Field', () => {
             testScenario.requireError ? 'error' : 'no error'
           } and previously there was require validator`, () => {
             // given
-            const emailValidatorSpy = jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue(testScenario.emailError);
-            const requireValidatorSpy = jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue(testScenario.requireError);
+            emailValidatorSpy.mockReturnValue(testScenario.emailError);
+            requireValidatorSpy.mockReturnValue(testScenario.requireError);
             fieldProps.type = testScenario.type;
             const value = 'Some value';
             fieldProps.value = value;
@@ -1742,12 +1719,8 @@ describe('Field', () => {
         [false, undefined].forEach((required) => {
           it(`should not assign errors if new type is ${type}, originType was ${type}, required is ${required} and previously there was not require validator`, () => {
             // given
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue('Incorrect email format');
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue('Incorrect email format');
             fieldProps.type = type;
             fieldProps.required = required;
             fieldState.originType = type;
@@ -1771,12 +1744,8 @@ describe('Field', () => {
           const value = 'Some value';
           const requireError = 'This field is required';
           const emailError = 'Incorrect email format';
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue(requireError);
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue(emailError);
+          requireValidatorSpy.mockReturnValue(requireError);
+          emailValidatorSpy.mockReturnValue(emailError);
           fieldProps.type = type;
           fieldProps.required = true;
           fieldProps.value = value;
@@ -1803,12 +1772,8 @@ describe('Field', () => {
 
         it(`should not assign errors if new type is ${type}, originType was ${type}, require is true and previously there was require validator`, () => {
           // given
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue('This field is required');
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue('Incorrect email format');
+          requireValidatorSpy.mockReturnValue('This field is required');
+          emailValidatorSpy.mockReturnValue('Incorrect email format');
           fieldProps.type = type;
           fieldProps.required = true;
           fieldProps.value = 'Some value';
@@ -1863,12 +1828,8 @@ describe('Field', () => {
         it(`should assign empty errors if new type is ${testScenario.type}, originType was ${testScenario.type}, require is true, required and email validators return empty string and previously there was not require validator`, () => {
           // given
           const value = 'Some value';
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue(testScenario.requireError);
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue(testScenario.emailError);
+          requireValidatorSpy.mockReturnValue(testScenario.requireError);
+          emailValidatorSpy.mockReturnValue(testScenario.emailError);
           fieldProps.type = testScenario.type;
           fieldProps.required = true;
           fieldProps.value = value;
@@ -1892,12 +1853,8 @@ describe('Field', () => {
 
         it(`should assign empty errors if new type is ${testScenario.type}, originType was ${testScenario.type}, require is true, required and email validators return empty string and previously there was require validator`, () => {
           // given
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue(testScenario.requireError);
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue(testScenario.emailError);
+          requireValidatorSpy.mockReturnValue(testScenario.requireError);
+          emailValidatorSpy.mockReturnValue(testScenario.emailError);
           fieldProps.type = testScenario.type;
           fieldProps.required = true;
           fieldProps.value = 'Some value';
@@ -1921,8 +1878,8 @@ describe('Field', () => {
         // given
         const value = 'Some value';
         const error = 'This field is required';
-        jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue(error);
-        jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+        requireValidatorSpy.mockReturnValue(error);
+        emailValidatorSpy.mockReturnValue('');
         fieldProps.type = FieldType.EMAIL;
         fieldProps.required = true;
         fieldProps.value = value;
@@ -1945,8 +1902,8 @@ describe('Field', () => {
         // given
         const value = 'Some value';
         const error = 'Incorrect email format';
-        jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
-        jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue(error);
+        requireValidatorSpy.mockReturnValue('');
+        emailValidatorSpy.mockReturnValue(error);
         fieldProps.type = FieldType.EMAIL;
         fieldProps.required = true;
         fieldProps.value = value;
@@ -1970,8 +1927,8 @@ describe('Field', () => {
           // given
           const value = 'Some value';
           const error = 'Incorrect email format';
-          jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
-          jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue(error);
+          requireValidatorSpy.mockReturnValue('');
+          emailValidatorSpy.mockReturnValue(error);
           fieldProps.type = FieldType.EMAIL;
           fieldProps.required = required;
           fieldProps.value = value;
@@ -1993,8 +1950,8 @@ describe('Field', () => {
         it(`should assign empty errors if new type is ${FieldType.EMAIL}, originType was ${FieldType.EMAIL}, require is ${required}, email validator returns empty string and previously there was require validator`, () => {
           // given
           const value = 'Some value';
-          jest.spyOn(FieldValidator, 'validateRequire').mockReturnValue('');
-          jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+          requireValidatorSpy.mockReturnValue('');
+          emailValidatorSpy.mockReturnValue('');
           fieldProps.type = FieldType.EMAIL;
           fieldProps.required = required;
           fieldProps.value = value;
@@ -2016,12 +1973,8 @@ describe('Field', () => {
         [FieldType.TEXT, FieldType.PASSWORD].forEach((type) => {
           it(`should assign empty errors if new type is ${type}, originType was ${type}, required is changed to ${required} and previously there was require validator`, () => {
             // given
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue('Incorrect email format');
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue('Incorrect email format');
             fieldProps.type = type;
             fieldProps.required = required;
             fieldProps.value = 'Some value';
@@ -2044,12 +1997,8 @@ describe('Field', () => {
             // given
             const emailError = 'Incorrect email format';
             const value = 'Some value';
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue(emailError);
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue(emailError);
             fieldProps.type = FieldType.EMAIL;
             fieldProps.required = required;
             fieldProps.value = value;
@@ -2072,12 +2021,8 @@ describe('Field', () => {
             // given
             const emailError = 'Incorrect email format';
             const value = 'Some value';
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest
-              .spyOn(FieldValidator, 'validateEmail')
-              .mockReturnValue(emailError);
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue(emailError);
             fieldProps.type = FieldType.EMAIL;
             fieldProps.required = required;
             fieldProps.value = value;
@@ -2099,10 +2044,8 @@ describe('Field', () => {
           it(`should assign empty errors if actual type is ${FieldType.EMAIL}, previous type was ${type}, required is ${required}, email validator returns empty string and previously there was require validator`, () => {
             // given
             const value = 'Some value';
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue('');
             fieldProps.type = FieldType.EMAIL;
             fieldProps.required = required;
             fieldProps.value = value;
@@ -2124,10 +2067,8 @@ describe('Field', () => {
           it(`should assign empty errors if actual type is ${FieldType.EMAIL}, previous type was ${type}, required is ${required}, email validator returns empty string and previously there was not require validator`, () => {
             // given
             const value = 'Some value';
-            jest
-              .spyOn(FieldValidator, 'validateRequire')
-              .mockReturnValue('This field is required');
-            jest.spyOn(FieldValidator, 'validateEmail').mockReturnValue('');
+            requireValidatorSpy.mockReturnValue('This field is required');
+            emailValidatorSpy.mockReturnValue('');
             fieldProps.type = FieldType.EMAIL;
             fieldProps.required = required;
             fieldProps.value = value;
@@ -2149,12 +2090,8 @@ describe('Field', () => {
 
         it(`should not assign errors if new type is undefined, originType was ${FieldType.TEXT}, required is ${required} and previously there was not require validator`, () => {
           // given
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue('This field is required');
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue('Incorrect email format');
+          requireValidatorSpy.mockReturnValue('This field is required');
+          emailValidatorSpy.mockReturnValue('Incorrect email format');
           fieldProps.type = undefined;
           fieldProps.required = required;
           fieldProps.value = 'Some value';
@@ -2175,12 +2112,8 @@ describe('Field', () => {
 
         it(`should not assign errors if new type is undefined, originType was ${FieldType.TEXT}, required is ${required} and previously there was require validator`, () => {
           // given
-          jest
-            .spyOn(FieldValidator, 'validateRequire')
-            .mockReturnValue('This field is required');
-          jest
-            .spyOn(FieldValidator, 'validateEmail')
-            .mockReturnValue('Incorrect email format');
+          requireValidatorSpy.mockReturnValue('This field is required');
+          emailValidatorSpy.mockReturnValue('Incorrect email format');
           fieldProps.type = undefined;
           fieldProps.required = required;
           fieldProps.value = 'Some value';
