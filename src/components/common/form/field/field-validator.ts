@@ -8,7 +8,7 @@ export class FieldValidator {
   }
 
   static validateEmail(email: string): string {
-    return FieldValidator.validateRequire(email) ||
+    return !FieldValidator.validateRequire(email) &&
       FieldValidator.EMAIL_REGEX.test(email.toLowerCase())
       ? ''
       : i18next.t('COMMON.EMAIL_ERROR');
