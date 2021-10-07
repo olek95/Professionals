@@ -2140,25 +2140,25 @@ describe('Field', () => {
           newClassName: 'some-class',
           oldClassName: 'field other-class',
           expectedClassName: 'field some-class',
-          characterName:
+          description:
             'new class name is different than old class name with default class name',
         },
         {
           newClassName: undefined,
           oldClassName: 'field some-class',
           expectedClassName: 'field',
-          characterName:
+          description:
             'new class name is undefined and old class name is together with default class name',
         },
         {
           newClassName: 'some-class',
           oldClassName: 'field',
           expectedClassName: 'field some-class',
-          characterName:
+          description:
             'new class name is different than old class name without default class name',
         },
       ].forEach((testScenario) => {
-        it(`should change className if ${testScenario.characterName}`, () => {
+        it(`should change className if ${testScenario.description}`, () => {
           // given
           fieldProps.className = testScenario.newClassName;
           fieldState.className = testScenario.oldClassName;
