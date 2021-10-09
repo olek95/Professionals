@@ -179,114 +179,115 @@ describe('FieldValidator', () => {
     ];
 
     userNameCorrectSymbols.forEach((userNameSymbols1) => {
-      it(`should not return error if email has not white space and has ${userNameSymbols1.characterDescription} character in only part before @ character`, () => {
-        // given
-        const email = `${userNameSymbols1.character}@email.em`;
+      for (let domainDigit = 0; domainDigit <= 9; domainDigit++) {
+        for (let number = 1; number <= 3; number++) {
+          it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in only part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+            // given
+            const part = `${domainDigit}`.repeat(number);
+            const email = `${userNameSymbols1.character}@[${part}.${part}.${part}.${part}]`;
 
-        // when
-        const emailError = FieldValidator.validateEmail(email);
+            // when
+            const emailError = FieldValidator.validateEmail(email);
 
-        // then
-        expect(emailError).toBe('');
-      });
+            // then
+            expect(emailError).toBe('');
+          });
 
-      it(`should not return error if email has not white space and has more than one ${userNameSymbols1.characterDescription} characters in only part before @ character`, () => {
-        // given
-        const email = `${userNameSymbols1.character}${userNameSymbols1.character}@email.em`;
+          it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in only part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+            // given
+            const part = `${domainDigit}`.repeat(number);
+            const email = `${userNameSymbols1.character}${userNameSymbols1.character}@[${part}.${part}.${part}.${part}]`;
 
-        // when
-        const emailError = FieldValidator.validateEmail(email);
+            // when
+            const emailError = FieldValidator.validateEmail(email);
 
-        // then
-        expect(emailError).toBe('');
-      });
+            // then
+            expect(emailError).toBe('');
+          });
 
-      userNameCorrectSymbols.forEach((userNameSymbols2) => {
-        it(`should not return error if email has not white space and has ${userNameSymbols1.characterDescription} character in first part and ${userNameSymbols2.characterDescription} character in second part before @ character`, () => {
-          // given
-          const email = `${userNameSymbols1.character}.${userNameSymbols2.character}@email.em`;
+          userNameCorrectSymbols.forEach((userNameSymbols2) => {
+            it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, ${userNameSymbols2.characterDescription} character in second part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+              // given
+              const part = `${domainDigit}`.repeat(number);
+              const email = `${userNameSymbols1.character}.${userNameSymbols2.character}@[${part}.${part}.${part}.${part}]`;
 
-          // when
-          const emailError = FieldValidator.validateEmail(email);
+              // when
+              const emailError = FieldValidator.validateEmail(email);
 
-          // then
-          expect(emailError).toBe('');
-        });
+              // then
+              expect(emailError).toBe('');
+            });
 
-        it(`should not return error if email has not white space and has more than one ${userNameSymbols1.characterDescription} characters in first part and ${userNameSymbols2.characterDescription} character in second part before @ character`, () => {
-          // given
-          const email = `${userNameSymbols1.character}${userNameSymbols1.character}.${userNameSymbols2.character}@email.em`;
+            it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, ${userNameSymbols2.characterDescription} character in second part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+              // given
+              const part = `${domainDigit}`.repeat(number);
+              const email = `${userNameSymbols1.character}${userNameSymbols1.character}.${userNameSymbols2.character}@[${part}.${part}.${part}.${part}]`;
 
-          // when
-          const emailError = FieldValidator.validateEmail(email);
+              // when
+              const emailError = FieldValidator.validateEmail(email);
 
-          // then
-          expect(emailError).toBe('');
-        });
+              // then
+              expect(emailError).toBe('');
+            });
 
-        it(`should not return error if email has not white space and has ${userNameSymbols1.characterDescription} character in first part and more than one ${userNameSymbols2.characterDescription} characters in second part before @ character`, () => {
-          // given
-          const email = `${userNameSymbols1.character}.${userNameSymbols2.character}${userNameSymbols2.character}@email.em`;
+            it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+              // given
+              const part = `${domainDigit}`.repeat(number);
+              const email = `${userNameSymbols1.character}.${userNameSymbols2.character}${userNameSymbols2.character}@[${part}.${part}.${part}.${part}]`;
 
-          // when
-          const emailError = FieldValidator.validateEmail(email);
+              // when
+              const emailError = FieldValidator.validateEmail(email);
 
-          // then
-          expect(emailError).toBe('');
-        });
+              // then
+              expect(emailError).toBe('');
+            });
 
-        it(`should not return error if email has not white space and has more than one ${userNameSymbols1.characterDescription} characters in first part and more than one ${userNameSymbols2.characterDescription} characters in second part before @ character`, () => {
-          // given
-          const email = `${userNameSymbols1.character}${userNameSymbols1.character}.${userNameSymbols2.character}${userNameSymbols2.character}@email.em`;
+            it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+              // given
+              const part = `${domainDigit}`.repeat(number);
+              const email = `${userNameSymbols1.character}${userNameSymbols1.character}.${userNameSymbols2.character}${userNameSymbols2.character}@[${part}.${part}.${part}.${part}]`;
 
-          // when
-          const emailError = FieldValidator.validateEmail(email);
+              // when
+              const emailError = FieldValidator.validateEmail(email);
 
-          // then
-          expect(emailError).toBe('');
-        });
-      });
-    });
-
-    it('should not return error if email has not white space and has more than two parts with correct characters before @ character', () => {
-      // given
-      const email = 'a.b.c@email.em';
-
-      // when
-      const emailError = FieldValidator.validateEmail(email);
-
-      // then
-      expect(emailError).toBe('');
-    });
-
-    it('should not return error if email has not white space and has character wrapped in quote before @ character', () => {
-      // given
-      const email = '"a"@email.em';
-
-      // when
-      const emailError = FieldValidator.validateEmail(email);
-
-      // then
-      expect(emailError).toBe('');
-    });
-
-    it('should not return error if email has not white space and has more than one character wrapped in quote before @ character', () => {
-      // given
-      const email = '"ab"@email.em';
-
-      // when
-      const emailError = FieldValidator.validateEmail(email);
-
-      // then
-      expect(emailError).toBe('');
+              // then
+              expect(emailError).toBe('');
+            });
+          });
+        }
+      }
     });
 
     for (let domainDigit = 0; domainDigit <= 9; domainDigit++) {
       for (let number = 1; number <= 3; number++) {
-        it(`should not return error if email has not white space and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+        it(`should not return error if email has not white space, has more than two parts with correct characters before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
           // given
           const part = `${domainDigit}`.repeat(number);
-          const email = `address@[${part}.${part}.${part}.${part}]`;
+          const email = `a.b.c@[${part}.${part}.${part}.${part}]`;
+
+          // when
+          const emailError = FieldValidator.validateEmail(email);
+
+          // then
+          expect(emailError).toBe('');
+        });
+
+        it(`should not return error if email has not white space, has character wrapped in quote before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+          // given
+          const part = `${domainDigit}`.repeat(number);
+          const email = `"a"@[${part}.${part}.${part}.${part}]`;
+
+          // when
+          const emailError = FieldValidator.validateEmail(email);
+
+          // then
+          expect(emailError).toBe('');
+        });
+
+        it(`should not return error if email has not white space,  has more than one character wrapped in quote before @ character and four parts in domain where each part contains ${number} of ${domainDigit} digit`, () => {
+          // given
+          const part = `${domainDigit}`.repeat(number);
+          const email = `"ab"@[${part}.${part}.${part}.${part}]`;
 
           // when
           const emailError = FieldValidator.validateEmail(email);
@@ -335,9 +336,9 @@ describe('FieldValidator', () => {
             numberDescription: 'more than two',
           },
         ].forEach((numberTestScenario) => {
-          it(`should not return error if email has not white space, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+          it(`should not return error if email has not white space, has more than two parts with correct characters before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
             // given
-            const email = `address@${
+            const email = `a.b.c@${
               domainTestScenario.character
             }.${topLevelTestScenario.character.repeat(
               numberTestScenario.number
@@ -350,9 +351,9 @@ describe('FieldValidator', () => {
             expect(emailError).toBe('');
           });
 
-          it(`should not return error if email has not white space, has more than one one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+          it(`should not return error if email has not white space, has character wrapped in quote before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
             // given
-            const email = `address@${domainTestScenario.character}${
+            const email = `"a"@${
               domainTestScenario.character
             }.${topLevelTestScenario.character.repeat(
               numberTestScenario.number
@@ -365,9 +366,88 @@ describe('FieldValidator', () => {
             expect(emailError).toBe('');
           });
 
-          it(`should not return error if email has not white space, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+          it(`should not return error if email has not white space, has more than one character wrapped in quote before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
             // given
-            const email = `address@${domainTestScenario.character}.${
+            const email = `"ab"@${
+              domainTestScenario.character
+            }.${topLevelTestScenario.character.repeat(
+              numberTestScenario.number
+            )}`;
+
+            // when
+            const emailError = FieldValidator.validateEmail(email);
+
+            // then
+            expect(emailError).toBe('');
+          });
+
+          it(`should not return error if email has not white space, has more than two parts with correct characters before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+            // given
+            const email = `a.b.c@${domainTestScenario.character}.${
+              domainTestScenario.character
+            }.${topLevelTestScenario.character.repeat(
+              numberTestScenario.number
+            )}`;
+
+            // when
+            const emailError = FieldValidator.validateEmail(email);
+
+            // then
+            expect(emailError).toBe('');
+          });
+
+          it(`should not return error if email has not white space, has character wrapped in quote before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+            // given
+            const email = `"a"@${domainTestScenario.character}.${
+              domainTestScenario.character
+            }.${topLevelTestScenario.character.repeat(
+              numberTestScenario.number
+            )}`;
+
+            // when
+            const emailError = FieldValidator.validateEmail(email);
+
+            // then
+            expect(emailError).toBe('');
+          });
+
+          it(`should not return error if email has not white space, has more than one character wrapped in quote before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+            // given
+            const email = `"ab"@${domainTestScenario.character}.${
+              domainTestScenario.character
+            }.${topLevelTestScenario.character.repeat(
+              numberTestScenario.number
+            )}`;
+
+            // when
+            const emailError = FieldValidator.validateEmail(email);
+
+            // then
+            expect(emailError).toBe('');
+          });
+
+          it(`should not return error if email has not white space, has more than two parts with correct characters before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+            // given
+            const email = `a.b.c@${domainTestScenario.character}${
+              domainTestScenario.character
+            }.${domainTestScenario.character}${
+              domainTestScenario.character
+            }.${topLevelTestScenario.character.repeat(
+              numberTestScenario.number
+            )}`;
+
+            // when
+            const emailError = FieldValidator.validateEmail(email);
+
+            // then
+            expect(emailError).toBe('');
+          });
+
+          it(`should not return error if email has not white space, has character wrapped in quote before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+            // given
+            const email = `"a"@${domainTestScenario.character}${
+              domainTestScenario.character
+            }.${domainTestScenario.character}${
               domainTestScenario.character
             }.${topLevelTestScenario.character.repeat(
               numberTestScenario.number
@@ -382,7 +462,7 @@ describe('FieldValidator', () => {
 
           it(`should not return error if email has not white space, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
             // given
-            const email = `address@${domainTestScenario.character}${
+            const email = `"ab"@${domainTestScenario.character}${
               domainTestScenario.character
             }.${domainTestScenario.character}${
               domainTestScenario.character
@@ -395,6 +475,334 @@ describe('FieldValidator', () => {
 
             // then
             expect(emailError).toBe('');
+          });
+
+          userNameCorrectSymbols.forEach((userNameSymbols1) => {
+            it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in only part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}@${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in only part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}${
+                userNameSymbols1.character
+              }@${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in only part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}@${
+                domainTestScenario.character
+              }.${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in only part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}${
+                userNameSymbols1.character
+              }@${domainTestScenario.character}.${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in only part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}@${
+                domainTestScenario.character
+              }${domainTestScenario.character}.${domainTestScenario.character}${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in only part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+              // given
+              const email = `${userNameSymbols1.character}${
+                userNameSymbols1.character
+              }@${domainTestScenario.character}${
+                domainTestScenario.character
+              }.${domainTestScenario.character}${
+                domainTestScenario.character
+              }.${topLevelTestScenario.character.repeat(
+                numberTestScenario.number
+              )}`;
+
+              // when
+              const emailError = FieldValidator.validateEmail(email);
+
+              // then
+              expect(emailError).toBe('');
+            });
+
+            userNameCorrectSymbols.forEach((userNameSymbols2) => {
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }@${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has one ${domainTestScenario.characterDescription} character in domain name and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }@${domainTestScenario.character}.${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has more than one domain name parts and each of them has one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }.${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }@${domainTestScenario.character}${
+                  domainTestScenario.character
+                }.${domainTestScenario.character}${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, ${userNameSymbols2.characterDescription} character in second part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }${domainTestScenario.character}.${
+                  domainTestScenario.character
+                }${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has ${userNameSymbols1.characterDescription} character in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}.${
+                  userNameSymbols2.character
+                }${userNameSymbols2.character}@${domainTestScenario.character}${
+                  domainTestScenario.character
+                }.${domainTestScenario.character}${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+
+              it(`should not return error if email has not white space, has more than one ${userNameSymbols1.characterDescription} characters in first part, more than one ${userNameSymbols2.characterDescription} characters in second part before @ character, has more than one domain name parts and each of them has more than one ${domainTestScenario.characterDescription} character and has ${numberTestScenario.numberDescription} ${topLevelTestScenario.characterDescription} characters in top level domain`, () => {
+                // given
+                const email = `${userNameSymbols1.character}${
+                  userNameSymbols1.character
+                }.${userNameSymbols2.character}${userNameSymbols2.character}@${
+                  domainTestScenario.character
+                }${domainTestScenario.character}.${
+                  domainTestScenario.character
+                }${
+                  domainTestScenario.character
+                }.${topLevelTestScenario.character.repeat(
+                  numberTestScenario.number
+                )}`;
+
+                // when
+                const emailError = FieldValidator.validateEmail(email);
+
+                // then
+                expect(emailError).toBe('');
+              });
+            });
           });
         });
       });
