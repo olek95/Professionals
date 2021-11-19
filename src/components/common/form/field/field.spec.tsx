@@ -262,8 +262,12 @@ describe('Field', () => {
           });
 
           describe('Displaying error', () => {
-            let requireValidatorSpy: jest.SpyInstance<string, string[]>;
-            let emailValidatorSpy: jest.SpyInstance<string, string[]>;
+            let requireValidatorSpy: jest.SpiedFunction<
+              (value: string) => string
+            >;
+            let emailValidatorSpy: jest.SpiedFunction<
+              (email: string) => string
+            >;
 
             beforeEach(() => {
               requireValidatorSpy = jest.spyOn(
@@ -1504,8 +1508,8 @@ describe('Field', () => {
     });
 
     describe('Errors change', () => {
-      let emailValidatorSpy: jest.SpyInstance<string, string[]>;
-      let requireValidatorSpy: jest.SpyInstance<string, string[]>;
+      let emailValidatorSpy: jest.SpiedFunction<(email: string) => string>;
+      let requireValidatorSpy: jest.SpiedFunction<(value: string) => string>;
 
       beforeEach(() => {
         emailValidatorSpy = jest.spyOn(FieldValidator, 'validateEmail');

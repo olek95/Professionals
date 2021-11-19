@@ -16,7 +16,7 @@ export const ToastProvider = (props: PropsWithChildren<{}>): JSX.Element => {
     []
   );
   const toastMessageFactory = useMemo(
-    () => createFactory(ToastMessageAnimated),
+    () => (props: any) => <ToastMessageAnimated {...props} />,
     []
   );
   return (
@@ -25,7 +25,7 @@ export const ToastProvider = (props: PropsWithChildren<{}>): JSX.Element => {
         className='toast-provider-container'
         toastMessageFactory={toastMessageFactory}
         ref={onToastMounted}
-      ></ToastContainer>
+      />
       {props.children}
     </ToastContext.Provider>
   );
