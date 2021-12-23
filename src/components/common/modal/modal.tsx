@@ -36,15 +36,17 @@ class Modal extends React.Component<ModalProps & WithTranslation> {
   };
 
   mapButtons(buttons: Button[]): JSX.Element[] {
-    return buttons.map((button) => (
-      <button
-        onClick={button.onClick}
-        disabled={button.disabled}
-        key={button.label}
-      >
-        {this.props.t(button.label)}
-      </button>
-    ));
+    return buttons.map((button) => {
+      return (
+        <button
+          onClick={button.onClick}
+          disabled={button.disabled}
+          key={button.label}
+        >
+          {this.props.t(button.label)}
+        </button>
+      );
+    });
   }
 }
 

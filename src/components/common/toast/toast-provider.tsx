@@ -1,10 +1,4 @@
-import {
-  createFactory,
-  PropsWithChildren,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { ToastContainer, ToastMessageAnimated } from 'react-toastr';
 import { ToastContext } from './toast-context';
 import './toast.scss';
