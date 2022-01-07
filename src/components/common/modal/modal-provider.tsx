@@ -1,9 +1,4 @@
-import React, {
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key';
 import Modal from './modal';
 import { ModalConfiguration } from './modal-configuration';
@@ -71,7 +66,7 @@ export const ModalProvider = <T extends {}>(
           leftButtons={finalConfiguration.leftButtons}
           rightButtons={finalConfiguration.rightButtons}
         >
-          <Body {...finalConfiguration.bodyParams}></Body>
+          <Body {...finalConfiguration.bodyParams} />
         </Modal>
       )}
       {props.children}
