@@ -1,4 +1,5 @@
 import {
+  fireEvent,
   getAllByTestId,
   queryAllByTestId,
   render,
@@ -9,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { MaybeMocked } from 'ts-jest/dist/utils/testing';
 import { mocked } from 'ts-jest/utils';
 import { Button } from '../../../models/common/button/button';
+import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key';
 import Modal from './modal';
 import { ModalContext } from './modal-context';
 import { ModalContextProps } from './modal-context-props';
@@ -88,7 +90,10 @@ describe('ModalProvider', () => {
     it('should have assigned close function', () => {
       // given
       const close = jest.fn();
-      jest.spyOn(React, 'useCallback').mockReturnValue(close);
+      jest
+        .spyOn(React, 'useCallback')
+        .mockReturnValueOnce(close)
+        .mockReturnValue(jest.fn());
 
       // when
       act(() => {
@@ -101,7 +106,6 @@ describe('ModalProvider', () => {
 
     it('should have assigned the same close function when children are changed', () => {
       // given
-      jest.spyOn(React, 'useCallback').mockReturnValue(jest.fn());
       const modalProvider = render(
         <ModalProvider>
           <div />
@@ -116,9 +120,39 @@ describe('ModalProvider', () => {
       );
 
       // then
-      expect(modalContextProviderSpy.mock.calls[0][0].value.close).toBe(
-        modalContextProviderSpy.mock.calls[1][0].value.close
-      );
+      const close = modalContextProviderSpy.mock.calls[0][0].value.close;
+      expect(close).toBeDefined();
+      expect(close).toBe(modalContextProviderSpy.mock.calls[1][0].value.close);
+    });
+
+    describe('close', () => {
+      it('should remove modal', () => {
+        // given
+        const modalId = 'modal';
+        jest
+          .spyOn(Modal.prototype, 'render')
+          .mockReturnValue(<div data-testid={modalId} />);
+        act(() => {
+          ReactDOM.render(<ModalProvider />, container);
+        });
+        act(() => {
+          mockedModalContext.Provider.mock.calls[0][0].value.configure({
+            body: () => <div />,
+            bodyParams: {},
+            leftButtons: [],
+            rightButtons: [],
+            title: '',
+          });
+        });
+
+        // when
+        act(() => {
+          modalContextProviderSpy.mock.calls[0][0].value.close();
+        });
+
+        // then
+        expect(queryAllByTestId(container, modalId)).toHaveLength(0);
+      });
     });
 
     describe('Modal', () => {
@@ -200,7 +234,17 @@ describe('ModalProvider', () => {
       it('should have assigned correct close function', () => {
         // given
         const close = jest.fn();
-        jest.spyOn(React, 'useCallback').mockReturnValue(close);
+        const otherFunction = jest.fn();
+        jest
+          .spyOn(React, 'useCallback')
+          .mockReturnValueOnce(otherFunction)
+          .mockReturnValueOnce(close)
+          .mockReturnValue(otherFunction)
+          .mockReturnValueOnce(otherFunction)
+          .mockReturnValueOnce(otherFunction)
+          .mockReturnValueOnce(otherFunction)
+          .mockReturnValueOnce(close)
+          .mockReturnValue(otherFunction);
         act(() => {
           ReactDOM.render(<ModalProvider />, container);
         });
@@ -497,6 +541,99 @@ describe('ModalProvider', () => {
         });
       });
 
+      describe('close', () => {
+        it('should remove modal', () => {
+          // given
+          const modalId = 'modal';
+          jest
+            .spyOn(Modal.prototype, 'render')
+            .mockReturnValue(<div data-testid={modalId} />);
+          act(() => {
+            ReactDOM.render(<ModalProvider />, container);
+          });
+          act(() => {
+            mockedModalContext.Provider.mock.calls[0][0].value.configure({
+              body: () => <div />,
+              bodyParams: {},
+              leftButtons: [],
+              rightButtons: [],
+              title: '',
+            });
+          });
+
+          // when
+          act(() => {
+            mockedModal.mock.instances[0]?.props.close();
+          });
+
+          // then
+          expect(queryAllByTestId(container, modalId)).toHaveLength(0);
+        });
+
+        it('should call onCancel function passed by configure function', () => {
+          // given
+          const modalId = 'modal';
+          jest
+            .spyOn(Modal.prototype, 'render')
+            .mockReturnValue(<div data-testid={modalId} />);
+          act(() => {
+            ReactDOM.render(<ModalProvider />, container);
+          });
+          const onCancel = jest.fn();
+          act(() => {
+            mockedModalContext.Provider.mock.calls[0][0].value.configure({
+              body: () => <div />,
+              bodyParams: {},
+              leftButtons: [],
+              rightButtons: [],
+              title: '',
+              onCancel,
+            });
+          });
+
+          // when
+          act(() => {
+            mockedModal.mock.instances[0]?.props.close();
+          });
+
+          // then
+          expect(onCancel).toHaveBeenCalled();
+        });
+
+        it('should call onCancel function passed by update function', () => {
+          // given
+          const modalId = 'modal';
+          jest
+            .spyOn(Modal.prototype, 'render')
+            .mockReturnValue(<div data-testid={modalId} />);
+          act(() => {
+            ReactDOM.render(<ModalProvider />, container);
+          });
+          const onCancel = jest.fn();
+          act(() => {
+            mockedModalContext.Provider.mock.calls[0][0].value.configure({
+              body: () => <div />,
+              bodyParams: {},
+              leftButtons: [],
+              rightButtons: [],
+              title: '',
+              onCancel: () => {},
+            });
+            mockedModalContext.Provider.mock.calls[0][0].value.update({
+              onCancel,
+            });
+          });
+
+          // when
+          act(() => {
+            mockedModal.mock.instances[0]?.props.close();
+          });
+
+          // then
+          expect(onCancel).toHaveBeenCalled();
+        });
+      });
+
       describe('Body', () => {
         describe('parameters passed by configure function', () => {
           beforeEach(() => {
@@ -655,5 +792,1025 @@ describe('ModalProvider', () => {
         expect(queryAllByTestId(container, child2)).toHaveLength(1);
       });
     });
+  });
+
+  describe('onEscPress', () => {
+    let mockedModalContext: MaybeMocked<typeof ModalContext>;
+    let mockedModal: MaybeMocked<typeof Modal>;
+
+    beforeEach(() => {
+      mockedModalContext = mocked(ModalContext);
+      jest.spyOn(mockedModalContext, 'Provider');
+      mockedModal = mocked(Modal);
+    });
+
+    it('should register function returned by useCallback on keydown event', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+
+      // when
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+
+      // then
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[2].value
+      );
+    });
+
+    it('should register different function returned by useCallback on keydown event if onCancel function is passed by configure function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+
+      // when
+      act(() => {
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[6].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if onCancel function is passed by update function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        modalContextValue.update({
+          onCancel: () => {},
+        });
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[10].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[6].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if modal context provider close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        modalContextValue.close();
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[10].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[6].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if modal close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        mockedModal.mock.instances[0]?.props.close();
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[10].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[6].value).not.toEqual(onEscPress);
+    });
+
+    it('should call onCancel function passed by configure function if esc key was pressed', () => {
+      // given
+      const onCancel = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(onCancel).toHaveBeenCalled();
+    });
+
+    it('should not call onCancel function passed by configure function if different key than esc was pressed', () => {
+      // given
+      const onCancel = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(onCancel).not.toHaveBeenCalled();
+    });
+
+    it('should call onCancel function passed by update function if esc key was pressed', () => {
+      // given
+      const onCancel1 = jest.fn();
+      const onCancel2 = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        const modalContextValue =
+          mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: onCancel1,
+        });
+        modalContextValue.update({
+          onCancel: onCancel2,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(onCancel1).not.toHaveBeenCalled();
+      expect(onCancel2).toHaveBeenCalled();
+    });
+
+    it('should not call onCancel function passed by update function if different key than esc was pressed', () => {
+      // given
+      const onCancel1 = jest.fn();
+      const onCancel2 = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        const modalContextValue =
+          mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: onCancel1,
+        });
+        modalContextValue.update({
+          onCancel: onCancel2,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(onCancel1).not.toHaveBeenCalled();
+      expect(onCancel2).not.toHaveBeenCalled();
+    });
+
+    it('should remove modal if esc key was pressed', () => {
+      // given
+      const modalId = 'modal';
+      jest
+        .spyOn(Modal.prototype, 'render')
+        .mockReturnValue(<div data-testid={modalId} />);
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(queryAllByTestId(container, modalId)).toHaveLength(0);
+    });
+
+    it('should not remove modal if different key than esc was pressed', () => {
+      // given
+      const modalId = 'modal';
+      jest
+        .spyOn(Modal.prototype, 'render')
+        .mockReturnValue(<div data-testid={modalId} />);
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(queryAllByTestId(container, modalId)).toHaveLength(1);
+    });
+
+    it('should register different function returned by useCallback on keydown event if esc key was pressed', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[10].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[6].value).not.toEqual(onEscPress);
+    });
+
+    it('should register the same function returned by useCallback on keydown event if different key than esc was pressed', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[6].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[2].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[10]).toBeUndefined();
+    });
+
+    it('should unregister function used by keydown event if component is unmounted', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        ReactDOM.unmountComponentAtNode(container);
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[2].value
+      );
+    });
+
+    it('should unregister function used by keydown event if onCancel function is passed by configure function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[2].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[6].value
+      );
+    });
+
+    it('should unregister function used by keydown event if onCancel function is passed by update function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        modalContextValue.update({
+          onCancel: () => {},
+        });
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[6].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[10].value
+      );
+    });
+
+    it('should unregister function used by keydown event if modal context provider close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        modalContextValue.close();
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[6].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[10].value
+      );
+    });
+
+    it('should unregister function used by keydown event if modal close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        mockedModal.mock.instances[0]?.props.close();
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[6].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[10].value
+      );
+    });
+
+    it('should unregister function used by keydown event if esc key was pressed', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[6].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[10].value
+      );
+    });
+
+    it('should not unregister function used by keydown event if different key than esc was pressed', () => {
+      // given
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <div />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onCancel: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(document.removeEventListener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onEnterPress', () => {
+    let mockedModalContext: MaybeMocked<typeof ModalContext>;
+    let mockedModal: MaybeMocked<typeof Modal>;
+
+    beforeEach(() => {
+      mockedModalContext = mocked(ModalContext);
+      jest.spyOn(mockedModalContext, 'Provider');
+      mockedModal = mocked(Modal);
+    });
+
+    it('should register function returned by useCallback on keydown event', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+
+      // when
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+
+      // then
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[3].value
+      );
+    });
+
+    it('should register different function returned by useCallback on keydown event if onEnterPressed function is passed by configure function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+
+      // when
+      act(() => {
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[7].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[3].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if onEnterPressed function is passed by update function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        modalContextValue.update({
+          onEnterPressed: () => {},
+        });
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[11].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[3].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[7].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if modal context provider close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        modalContextValue.close();
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[11].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[3].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[7].value).not.toEqual(onEscPress);
+    });
+
+    it('should register different function returned by useCallback on keydown event if modal close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      jest.spyOn(document, 'addEventListener');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+
+      // when
+      act(() => {
+        mockedModal.mock.instances[0]?.props.close();
+      });
+
+      // then
+      const onEscPress = useCallbackSpy.mock.results[11].value;
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        'keydown',
+        onEscPress
+      );
+      expect(useCallbackSpy.mock.results[3].value).not.toEqual(onEscPress);
+      expect(useCallbackSpy.mock.results[7].value).not.toEqual(onEscPress);
+    });
+
+    it('should call onEnterPressed function passed by configure function if enter key was pressed', () => {
+      // given
+      const onEnterPressed = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(onEnterPressed).toHaveBeenCalled();
+    });
+
+    it('should not call onEnterPressed function passed by configure function if different key than enter was pressed', () => {
+      // given
+      const onEnterPressed = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(onEnterPressed).not.toHaveBeenCalled();
+    });
+
+    it('should call onEnterPressed function passed by update function if enter key was pressed', () => {
+      // given
+      const onEnterPressed1 = jest.fn();
+      const onEnterPressed2 = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        const modalContextValue =
+          mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: onEnterPressed1,
+        });
+        modalContextValue.update({
+          onEnterPressed: onEnterPressed2,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ENTER,
+      });
+
+      // then
+      expect(onEnterPressed1).not.toHaveBeenCalled();
+      expect(onEnterPressed2).toHaveBeenCalled();
+    });
+
+    it('should not call onEnterPressed function passed by update function if different key than enter was pressed', () => {
+      // given
+      const onEnterPressed1 = jest.fn();
+      const onEnterPressed2 = jest.fn();
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        const modalContextValue =
+          mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: onEnterPressed1,
+        });
+        modalContextValue.update({
+          onEnterPressed: onEnterPressed2,
+        });
+      });
+
+      // when
+      fireEvent.keyDown(document, {
+        key: KeyboardKey.ESCAPE,
+      });
+
+      // then
+      expect(onEnterPressed1).not.toHaveBeenCalled();
+      expect(onEnterPressed2).not.toHaveBeenCalled();
+    });
+
+    it('should unregister function used by keydown event if onEnterPressed function is passed by configure function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        mockedModalContext.Provider.mock.calls[0][0].value.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[3].value
+      );
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[7].value
+      );
+    });
+
+    it('should unregister function used by keydown event if onEnterPressed function is passed by update function', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        modalContextValue.update({
+          onEnterPressed: () => {},
+        });
+      });
+
+      // then
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[11].value
+      );
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[7].value
+      );
+    });
+
+    it('should unregister function used by keydown event if modal context provider close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        modalContextValue.close();
+      });
+
+      // then
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[11].value
+      );
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[7].value
+      );
+    });
+
+    it('should unregister function used by keydown event if modal close function is called', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      let modalContextValue: ModalContextProps<any>;
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+        modalContextValue = mockedModalContext.Provider.mock.calls[0][0].value;
+        modalContextValue.configure({
+          body: () => <span />,
+          bodyParams: {},
+          leftButtons: [],
+          rightButtons: [],
+          title: '',
+          onEnterPressed: () => {},
+        });
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        mockedModal.mock.instances[0]?.props.close();
+      });
+
+      // then
+      expect(document.removeEventListener).not.toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[11].value
+      );
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[7].value
+      );
+    });
+
+    it('should unregister function used by keydown event when component is unmounted', () => {
+      // given
+      const useCallbackSpy = jest.spyOn(React, 'useCallback');
+      act(() => {
+        ReactDOM.render(<ModalProvider />, container);
+      });
+      jest.spyOn(document, 'removeEventListener');
+
+      // when
+      act(() => {
+        ReactDOM.unmountComponentAtNode(container);
+      });
+
+      // then
+      expect(document.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        useCallbackSpy.mock.results[3].value
+      );
+    });
+  });
+
+  afterEach(() => {
+    ReactDOM.unmountComponentAtNode(container);
   });
 });

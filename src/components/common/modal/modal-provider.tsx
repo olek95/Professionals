@@ -1,4 +1,10 @@
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import {
+  ComponentType,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { KeyboardKey } from '../../../models/common/keyboard-key/keyboard-key';
 import Modal from './modal';
 import { ModalConfiguration } from './modal-configuration';
@@ -21,7 +27,7 @@ export const ModalProvider = <T extends {}>(
         },
       } as ModalConfiguration<T>)
     : undefined;
-  const Body = finalConfiguration?.body as React.ComponentType<T>;
+  const Body = finalConfiguration?.body as ComponentType<T>;
   const close = useCallback(() => {
     setConfiguration(undefined);
     setUpdatedConfiguration(undefined);
