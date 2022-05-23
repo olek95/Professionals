@@ -29,8 +29,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   private readonly loginButton: Button;
   private readonly registerButton: Button;
 
-  private loginModal: ModalContextProps<LoginProps> | undefined;
-  private registrationModal: ModalContextProps<RegistrationProps> | undefined;
+  private modal: ModalContextProps<LoginProps | RegistrationProps> | undefined;
 
   constructor(props: WithTranslation) {
     super(props);
@@ -40,7 +39,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
       label: 'TOP_BAR.LOGIN_BUTTON',
       onClick: () =>
         UserService.login(this.state.login, this.state.password)
-          .then(this.loginModal?.close)
+          .then(this.onLoginModalClose)
           .catch(this.onError),
     };
     this.registerButton = {
@@ -56,7 +55,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
             UserService.login(this.state.login, this.state.password).catch(
               this.onError
             );
-            this.registrationModal?.close();
+            this.onRegistrationModalClose();
           })
           .catch(this.onError),
     };
@@ -65,10 +64,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   render(): JSX.Element {
     return (
       <div className='top-bar'>
-        <ModalContext.Consumer>{this.setLoginModal}</ModalContext.Consumer>
-        <ModalContext.Consumer>
-          {this.setRegistrationModal}
-        </ModalContext.Consumer>
+        <ModalContext.Consumer>{this.setModal}</ModalContext.Consumer>
         <button className='top-bar-login' onClick={this.openLoginModal}>
           {this.props.t('TOP_BAR.LOGIN_BUTTON')}
         </button>
@@ -79,23 +75,16 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     );
   }
 
-  setLoginModal = (
+  setModal = (
     modalContextProps: ModalContextProps<LoginProps>
   ): ReactNode => {
-    this.loginModal = modalContextProps;
-    return;
-  };
-
-  setRegistrationModal = (
-    modalContextProps: ModalContextProps<RegistrationProps>
-  ): ReactNode => {
-    this.registrationModal = modalContextProps;
+    this.modal = modalContextProps;
     return;
   };
 
   openLoginModal = (): void => {
     this.setState(TopBar.DEFAULT_MODALS_CONF, () =>
-      this.loginModal?.configure({
+      this.modal?.configure({
         body: Login,
         bodyParams: {
           loginChange: (login) =>
@@ -121,7 +110,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
 
   openRegistrationModal = (): void => {
     this.setState(TopBar.DEFAULT_MODALS_CONF, () => {
-      this.registrationModal?.configure({
+      (this.modal as ModalContextProps<RegistrationProps>)?.configure({
         body: Registration,
         bodyParams: {
           email: this.state.email,
@@ -195,7 +184,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   }
 
   private onLoginModalClose = (): void => {
-    this.loginModal?.close();
+    this.modal?.close();
     this.setState(TopBar.DEFAULT_MODALS_CONF, this.updateLoginModal);
   };
 
@@ -217,7 +206,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
     additionalParams?: Partial<RegistrationProps>
   ): void {
     confirmationButton.disabled = this.state.disabledConfirmation;
-    this.registrationModal?.update({
+    this.modal?.update({
       bodyParams: {
         login: this.state.login,
         password: this.state.password,
@@ -228,7 +217,7 @@ class TopBar extends React.Component<WithTranslation, TopBarState> {
   }
 
   private onRegistrationModalClose = (): void => {
-    this.registrationModal?.close();
+    this.modal?.close();
     this.setState(TopBar.DEFAULT_MODALS_CONF, this.updateRegistrationModal);
   };
 }
